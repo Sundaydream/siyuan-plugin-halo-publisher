@@ -1,0 +1,83 @@
+{
+  "name": "siyuan-halo-publisher",
+  "author": "Sundaydream",
+  "url": "https://github.com/Sundaydream/siyuan-plugin-halo-publisher",
+  "version": "1.0.0",
+  "minAppVersion": "3.5.2",
+  "disabledInPublish": false,
+  "backends": [
+    "windows",
+    "linux",
+    "darwin",
+    "ios",
+    "android",
+    "harmony",
+    "docker",
+    "all"
+  ],
+  "frontends": [
+    "desktop",
+    "mobile",
+    "browser-desktop",
+    "browser-mobile",
+    "desktop-window",
+    "all"
+  ],
+  "displayName": {
+    "default": "Halo 发布插件",
+    "zh_CN": "Halo 发布插件",
+    "en_US": "Halo Publisher"
+  },
+  "description": {
+    "default": "将思源笔记文章发布到 Halo 博客平台的插件",
+    "zh_CN": "将思源笔记文章发布到 Halo 博客平台的插件",
+    "en_US": "Publish SiYuan notes to Halo blog platform"
+  },
+  "readme": {
+    "default": "README.md",
+    "zh_CN": "README.md",
+    "en_US": "README.md"
+  },
+  "icon": "icon.png",
+  "toolbar": {
+    "icon": "icon.png",
+    "title": "发布到 Halo",
+    "position": "right",
+    "menu": [
+      {
+        "icon": "icon.png",
+        "text": "文章发布",
+        "action": "openArticlePublish"
+      },
+      {
+        "icon": "icon.png",
+        "text": "文章管理",
+        "action": "openArticleManagement"
+      },
+      {
+        "icon": "icon.png",
+        "text": "通用设置",
+        "action": "openGeneralSettings"
+      },
+      {
+        "icon": "icon.png",
+        "text": "关于",
+        "action": "openAbout"
+      }
+    ]
+  },
+  "window": {
+    "width": 800,
+    "height": 600
+  },
+  "funding": {
+    "custom": []
+  },
+  "keywords": [
+    "halo",
+    "发布",
+    "博客",
+    "publish",
+    "blog"
+  ]
+}
