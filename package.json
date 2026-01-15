@@ -1,5 +1,5 @@
 {
-  "name": "siyuan-halo-publisher",
+  "name": "siyuan-plugin-halo-publisher",
   "version": "1.0.0",
   "type": "module",
   "description": "将思源笔记文章发布到 Halo 博客平台的插件",
