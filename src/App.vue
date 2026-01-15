@@ -66,6 +66,17 @@
           >
           <div v-if="!postForm.coverImage" class="warning-message">{{ t('publish.warningNoCover') }}</div>
         </div>
+
+        <!-- 存储策略选择（可选，覆盖默认设置） -->
+        <div class="form-group" v-if="storagePolicies.length > 0">
+          <label>{{ t('publish.storagePolicy') }}</label>
+          <select v-model="publishStoragePolicy" class="filter-select">
+            <option value="">{{ t('publish.storagePolicyPlaceholder') }}</option>
+            <option v-for="policy in storagePolicies" :key="policy.id" :value="policy.id">
+              {{ policy.name }} ({{ policy.templateName }})
+            </option>
+          </select>
+        </div>
         
         <!-- 分类标签选择 -->
         <div class="taxonomy-grid">
@@ -595,6 +606,23 @@
           </div>
         </div>
 
+        <div class="setting-item">
+          <div class="setting-info">
+            <label class="setting-label">{{ t('settings.storagePolicy') }}</label>
+            <div class="setting-description">{{ t('settings.storagePolicyDesc') }}</div>
+          </div>
+          <div class="setting-control">
+            <select v-model="selectedStoragePolicy" class="language-select" :disabled="!isConfigValid || isLoadingPolicies">
+              <option value="">{{ t('settings.storagePolicyDefault') }}</option>
+              <option v-if="isLoadingPolicies" value="" disabled>{{ t('settings.storagePolicyLoading') }}</option>
+              <option v-if="!isLoadingPolicies && storagePolicies.length === 0" value="" disabled>{{ t('settings.storagePolicyNone') }}</option>
+              <option v-for="policy in storagePolicies" :key="policy.id" :value="policy.id">
+                {{ policy.name }} ({{ policy.templateName }})
+              </option>
+            </select>
+          </div>
+        </div>
+
         <div class="button-group">
           <button @click="saveFormatOptions" class="btn-primary">{{ t('settings.saveSettings') }}</button>
         </div>
@@ -795,6 +823,18 @@ const formatOptions = reactive({
   optimizeImages: true
 });
 
+// 存储策略
+const storagePolicies = ref<{ id: string; name: string; templateName: string }[]>([]);
+const selectedStoragePolicy = ref<string>(''); // 默认存储策略
+const publishStoragePolicy = ref<string>(''); // 发布时指定的存储策略（可覆盖默认）
+const isLoadingPolicies = ref(false);
+
+// 当默认存储策略改变时，同步到发布页面
+// 使用 immediate: true 确保加载时也同步
+watch(selectedStoragePolicy, (newValue) => {
+  publishStoragePolicy.value = newValue;
+}, { immediate: true });
+
 // 预览模式
 const previewMode = ref<'edit' | 'preview'>('edit');
 
@@ -937,8 +977,9 @@ const saveConfig = async () => {
     }
     
     showMessage(t('msg.configSaved'), 'success');
-    // 保存配置后加载分类和标签
+    // 保存配置后加载分类、标签和存储策略
     await loadTaxonomies();
+    await loadStoragePolicies();
   } catch (error) {
     console.error('保存配置失败:', error);
     showMessage(t('msg.saveFailed'), 'error');
@@ -969,6 +1010,7 @@ onMounted(async () => {
         // 等待一下 UI 渲染
         setTimeout(() => {
           loadTaxonomies();
+          loadStoragePolicies();
         }, 500);
       }
     }
@@ -1061,6 +1103,11 @@ const loadFormatOptions = async () => {
       if (savedLanguage && ['zh-CN', 'zh-TW', 'en'].includes(savedLanguage)) {
         setLanguage(savedLanguage);
       }
+
+      const savedStoragePolicy = await plugin.loadPluginData('storage-policy');
+      if (savedStoragePolicy) {
+        selectedStoragePolicy.value = savedStoragePolicy;
+      }
     } else {
       // 降级到 localStorage
       const savedFormatOptions = localStorage.getItem('halo-publisher-format-options');
@@ -1094,6 +1141,7 @@ const saveFormatOptions = async () => {
       await plugin.savePluginData('slug-options', { ...slugOptions });
       await plugin.savePluginData('show-debug', showDebug.value);
       await plugin.savePluginData('language', currentLanguage.value);
+      await plugin.savePluginData('storage-policy', selectedStoragePolicy.value);
     } else {
       // 降级到 localStorage
       localStorage.setItem('halo-publisher-format-options', JSON.stringify(formatOptions));
@@ -1247,6 +1295,31 @@ const loadTaxonomies = async () => {
   }
 };
 
+// 加载存储策略列表
+const loadStoragePolicies = async () => {
+  if (!isConfigValid.value) {
+    return;
+  }
+  
+  isLoadingPolicies.value = true;
+  try {
+    const config = useHalowebWeb({
+      url: configForm.url,
+      cookie: configForm.cookie
+    });
+    const adaptor = new HalowebWebAdaptor(config);
+    
+    const policies = await adaptor.getStoragePolicies();
+    storagePolicies.value = policies;
+    console.log('[HaloPublisher] Loaded storage policies:', policies);
+  } catch (error) {
+    console.error('加载存储策略失败:', error);
+    storagePolicies.value = [];
+  } finally {
+    isLoadingPolicies.value = false;
+  }
+};
+
 // 获取当前思源笔记内容
 const fetchCurrentNote = async () => {
   try {
@@ -1368,10 +1441,18 @@ const publishPost = async () => {
     publishProgress.value = 10;
     publishStep.value = t('publish.stepConfig');
     
+    // 确定使用的存储策略：优先使用发布页面选择的，否则使用全局设置
+    const effectiveStoragePolicy = publishStoragePolicy.value || selectedStoragePolicy.value;
+    console.log('[HaloPublisher] Using storage policy for publish:', effectiveStoragePolicy || 'default-policy');
+    
     const config = useHalowebWeb({
       url: configForm.url,
       cookie: configForm.cookie
     });
+    // 添加存储策略到配置
+    if (effectiveStoragePolicy) {
+      config.storagePolicyName = effectiveStoragePolicy;
+    }
     const adaptor = new HalowebWebAdaptor(config);
     
     // 进度 20%: 处理分类和标签

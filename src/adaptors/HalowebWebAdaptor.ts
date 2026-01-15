@@ -17,6 +17,7 @@ import { LuteUtil } from '../utils/luteUtil';
 export class HalowebWebAdaptor extends BaseExtendApi {
   private readonly CONSOLE_API = 'apis/api.console.halo.run/v1alpha1';
   private readonly CONTENT_API = 'apis/content.halo.run/v1alpha1';
+  private readonly STORAGE_API = 'apis/storage.halo.run/v1alpha1';
 
   // 图片上传缓存：文件名 -> 已上传的 URL（避免重复上传）
   private static imageUploadCache: Map<string, string> = new Map();
@@ -827,6 +828,44 @@ export class HalowebWebAdaptor extends BaseExtendApi {
       return [];
     }
   }
+
+  /**
+   * 获取存储策略列表
+   * @returns 存储策略列表
+   */
+  async getStoragePolicies(): Promise<{ id: string; name: string; templateName: string }[]> {
+    try {
+      // 使用 Storage API 获取存储策略
+      const url = `${this.cfg.apiUrl}${this.STORAGE_API}/policies`;
+      console.log('[HaloPublisher] Fetching storage policies from:', url);
+
+      const response = await this.proxyRequest(url, {
+        method: 'GET',
+        headers: {
+          'Cookie': this.cfg.cookie
+        }
+      });
+
+      console.log('[HaloPublisher] Storage policies response:', JSON.stringify(response));
+
+      // Halo 2.x 返回列表数据 { items: [...] }
+      if (response && Array.isArray(response.items)) {
+        const policies = response.items.map((item: any) => ({
+          id: item.metadata.name,
+          name: item.spec?.displayName || item.metadata.name,
+          templateName: item.spec?.templateName || 'unknown'
+        }));
+        console.log('[HaloPublisher] Parsed policies:', policies);
+        return policies;
+      }
+
+      console.warn('[HaloPublisher] No storage policies found in response');
+      return [];
+    } catch (error) {
+      console.error('获取存储策略列表失败:', error);
+      return [];
+    }
+  }
   /**
    * 创建新分类
    * @param name 分类名称
@@ -956,10 +995,13 @@ export class HalowebWebAdaptor extends BaseExtendApi {
       // 使用 TextEncoder 编码文本部分
       const textEncoder = new TextEncoder();
 
+      const policyName = this.cfg.storagePolicyName || 'default-policy';
+      console.log('[HaloPublisher] Using storage policy:', policyName);
+
       const policyPart = textEncoder.encode(
         `--${boundary}\r\n` +
         `Content-Disposition: form-data; name="policyName"\r\n\r\n` +
-        `default-policy\r\n`
+        `${policyName}\r\n`
       );
 
       const groupPart = textEncoder.encode(

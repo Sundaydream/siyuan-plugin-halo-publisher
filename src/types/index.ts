@@ -6,6 +6,7 @@ export interface PluginConfig {
   middlewareUrl: string;
   picbedType: string;
   cookie: string;
+  storagePolicyName?: string; // 存储策略名称，如 'attachment-policy-xxx'
 }
 
 // 思源笔记文档类型
@@ -176,4 +177,11 @@ export interface SiyuanNoteItem {
   categoryNames?: string[];  // 分类显示名称
   tags?: string[];           // 标签 ID 列表
   tagNames?: string[];       // 标签显示名称
+}
+
+// 存储策略类型
+export interface StoragePolicy {
+  id: string;           // metadata.name
+  name: string;         // spec.displayName
+  templateName: string; // spec.templateName (e.g. 'local', 's3')
 }

@@ -175,6 +175,13 @@ const translations: Record<Language, Record<string, string>> = {
         'settings.cookieStep5': '刷新页面，点击任意一个请求',
         'settings.cookieStep6': '在 Request Headers（请求头）中找到 Cookie 字段',
         'settings.cookieStep7': '复制完整的 Cookie 值，粘贴到上方输入框',
+        'settings.storagePolicy': '附件存储策略',
+        'settings.storagePolicyDesc': '选择图片和附件的存储位置',
+        'settings.storagePolicyDefault': '使用默认策略',
+        'settings.storagePolicyLoading': '加载中...',
+        'settings.storagePolicyNone': '未获取到存储策略',
+        'publish.storagePolicy': '存储策略',
+        'publish.storagePolicyPlaceholder': '使用默认存储策略',
 
         // 授权状态
         'auth.valid': '授权有效',
@@ -384,6 +391,13 @@ const translations: Record<Language, Record<string, string>> = {
         'settings.cookieStep5': '刷新頁面，點擊任意一個請求',
         'settings.cookieStep6': '在 Request Headers（請求頭）中找到 Cookie 欄位',
         'settings.cookieStep7': '複製完整的 Cookie 值，貼上到上方輸入框',
+        'settings.storagePolicy': '附件儲存策略',
+        'settings.storagePolicyDesc': '選擇圖片和附件的儲存位置',
+        'settings.storagePolicyDefault': '使用預設策略',
+        'settings.storagePolicyLoading': '載入中...',
+        'settings.storagePolicyNone': '未獲取到儲存策略',
+        'publish.storagePolicy': '儲存策略',
+        'publish.storagePolicyPlaceholder': '使用預設儲存策略',
 
         // 授權狀態
         'auth.valid': '授權有效',
@@ -593,6 +607,13 @@ const translations: Record<Language, Record<string, string>> = {
         'settings.cookieStep5': 'Refresh the page and click any request',
         'settings.cookieStep6': 'Find the Cookie field in Request Headers',
         'settings.cookieStep7': 'Copy the complete Cookie value and paste it above',
+        'settings.storagePolicy': 'Attachment Storage Policy',
+        'settings.storagePolicyDesc': 'Choose storage location for images and attachments',
+        'settings.storagePolicyDefault': 'Use default policy',
+        'settings.storagePolicyLoading': 'Loading...',
+        'settings.storagePolicyNone': 'No policies found',
+        'publish.storagePolicy': 'Storage Policy',
+        'publish.storagePolicyPlaceholder': 'Use default storage policy',
 
         // Auth status
         'auth.valid': 'Authorized',
