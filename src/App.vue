@@ -733,7 +733,7 @@
       <div class="about-section">
         <div class="about-header">
           <h3>{{ t('about.pluginName') }}</h3>
-          <div class="version">{{ t('about.version') }}: 1.0.0</div>
+          <div class="version">{{ t('about.version') }}: {{ PluginInfo.version }}</div>
         </div>
         
         <div class="about-content">
@@ -764,6 +764,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue';
+import PluginInfo from '../plugin.json';
 import { useHalowebWeb, saveConfig as saveLocalConfig, loadConfig } from './utils/useHalowebWeb';
 import { HalowebWebAdaptor } from './adaptors/HalowebWebAdaptor';
 import { SiyuanUtils } from './utils/siyuanUtils';
