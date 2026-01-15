@@ -623,6 +623,13 @@ export default class HaloPublisherPlugin extends Plugin {
     }
   }
 
+  /**
+   * 用户点击插件管理卡片上的设置图标时调用
+   */
+  openSetting() {
+    this.openPluginDialog('generalSettings');
+  }
+
   onunload() {
     console.log('Halo Publisher Plugin unloaded');
 
@@ -636,5 +643,34 @@ export default class HaloPublisherPlugin extends Plugin {
     if ((window as any).haloPublisherPlugin) {
       delete (window as any).haloPublisherPlugin;
     }
+  }
+
+  /**
+   * 插件卸载时调用
+   */
+  async uninstall() {
+    console.log("Uninstalling Halo Publisher Plugin, cleaning up data...");
+
+    // 需要清理的数据 key
+    const dataKeys = [
+      'config',
+      'format-options',
+      'slug-options',
+      'show-debug',
+      'language',
+      'storage-policy',
+      'publish-records',
+      'image-upload-cache'
+    ];
+
+    for (const key of dataKeys) {
+      try {
+        await this.removeData(`settings-${key}.json`);
+      } catch (e) {
+        console.warn(`[HaloPublisher] Failed to remove data: settings-${key}.json`, e);
+      }
+    }
+
+    console.log("Halo Publisher Plugin uninstalled.");
   }
 }
