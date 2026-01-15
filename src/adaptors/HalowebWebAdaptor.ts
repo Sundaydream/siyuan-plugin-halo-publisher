@@ -324,7 +324,6 @@ export class HalowebWebAdaptor extends BaseExtendApi {
       console.warn('[HaloPublisher] Failed to fetch existing posts for debug:', e);
     }
 
-    // 使用参考实现的 API 调用方式
     // 发送包含 post 和 content 的完整 payload
     console.log('[HaloPublisher] Creating Post Payload:', JSON.stringify(params));
 
