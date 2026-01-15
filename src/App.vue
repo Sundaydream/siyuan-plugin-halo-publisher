@@ -77,6 +77,28 @@
             </option>
           </select>
         </div>
+
+        <!-- 发布选项 -->
+        <div class="form-group">
+          <label>{{ t('publish.publishOptions') }}</label>
+          <div class="publish-options-row">
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="publishOptions.allowComment">
+              <span>{{ t('publish.allowComment') }}</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="publishOptions.pinned">
+              <span>{{ t('publish.pinned') }}</span>
+            </label>
+            <div class="visibility-select">
+              <span class="visibility-label">{{ t('publish.visibility') }}:</span>
+              <select v-model="publishOptions.visible" class="filter-select visibility-dropdown">
+                <option value="PUBLIC">{{ t('publish.visibilityPublic') }}</option>
+                <option value="PRIVATE">{{ t('publish.visibilityPrivate') }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
         
         <!-- 分类标签选择 -->
         <div class="taxonomy-grid">
@@ -407,7 +429,7 @@
           <div class="modal-body">
             <div class="edit-warning" v-if="PublishStore.isPluginPublished(editingPostId)">
               <span class="warning-icon">⚠️</span>
-              <span>此文章由插件发布。建议在思源笔记中修改后使用同步功能更新，直接编辑可能导致数据不一致。</span>
+              <span>此文章由插件发布。文章标题建议在思源笔记中修改后使用同步功能更新，其余参数如别名、分类、标签、发布选项等可以直接在这里修改。</span>
             </div>
             <div class="edit-form-group">
               <label class="edit-label">{{ t('management.articleTitle') }}</label>
@@ -445,6 +467,27 @@
                   {{ tag.name }}
                 </div>
                 <div v-if="tags.length === 0" class="taxonomy-empty">暂无标签</div>
+              </div>
+            </div>
+            <!-- 发布选项 -->
+            <div class="edit-form-group">
+              <label class="edit-label">{{ t('publish.publishOptions') }}</label>
+              <div class="edit-publish-options">
+                <label class="checkbox-label">
+                  <input type="checkbox" v-model="editForm.allowComment">
+                  <span>{{ t('publish.allowComment') }}</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" v-model="editForm.pinned">
+                  <span>{{ t('publish.pinned') }}</span>
+                </label>
+                <div class="visibility-inline">
+                  <span>{{ t('publish.visibility') }}:</span>
+                  <select v-model="editForm.visible" class="visibility-dropdown-small">
+                    <option value="PUBLIC">{{ t('publish.visibilityPublic') }}</option>
+                    <option value="PRIVATE">{{ t('publish.visibilityPrivate') }}</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -811,7 +854,11 @@ const editForm = reactive({
   title: '',
   slug: '',
   categories: [] as string[],
-  tags: [] as string[]
+  tags: [] as string[],
+  // 发布选项
+  allowComment: true,
+  pinned: false,
+  visible: 'PUBLIC' as 'PUBLIC' | 'PRIVATE'
 });
 
 // 分类和标签
@@ -843,6 +890,13 @@ const storagePolicies = ref<{ id: string; name: string; templateName: string }[]
 const selectedStoragePolicy = ref<string>(''); // 默认存储策略
 const publishStoragePolicy = ref<string>(''); // 发布时指定的存储策略（可覆盖默认）
 const isLoadingPolicies = ref(false);
+
+// 发布选项
+const publishOptions = reactive({
+  allowComment: true,   // 允许评论，默认开启
+  pinned: false,        // 置顶，默认关闭
+  visible: 'PUBLIC' as 'PUBLIC' | 'PRIVATE' // 可见性，默认公开
+});
 
 // 当默认存储策略改变时，同步到发布页面
 // 使用 immediate: true 确保加载时也同步
@@ -1515,7 +1569,11 @@ const publishPost = async () => {
         coverImage: postForm.coverImage,
         categories: selectedCategoryIds,
         tags: selectedTagIds,
-        summary: postForm.summary
+        summary: postForm.summary,
+        // 发布选项
+        allowComment: publishOptions.allowComment,
+        pinned: publishOptions.pinned,
+        visible: publishOptions.visible
       },
       content: {
         content: processedContent,
@@ -1629,6 +1687,10 @@ const openEditDialog = (post: any) => {
   editForm.slug = post.slug || '';
   editForm.categories = post.categories || [];
   editForm.tags = post.tags || [];
+  // 发布选项（从文章详情中获取，默认值为标准默认值）
+  editForm.allowComment = post.allowComment ?? true;
+  editForm.pinned = post.pinned ?? false;
+  editForm.visible = post.visible ?? 'PUBLIC';
   showEditDialog.value = true;
 };
 
@@ -1640,6 +1702,10 @@ const closeEditDialog = () => {
   editForm.slug = '';
   editForm.categories = [];
   editForm.tags = [];
+  // 重置发布选项为默认值
+  editForm.allowComment = true;
+  editForm.pinned = false;
+  editForm.visible = 'PUBLIC';
 };
 
 // 切换编辑表单中的分类
@@ -1678,7 +1744,11 @@ const saveEditForm = async () => {
       title: editForm.title,
       slug: editForm.slug,
       categories: editForm.categories,
-      tags: editForm.tags
+      tags: editForm.tags,
+      // 发布选项
+      allowComment: editForm.allowComment,
+      pinned: editForm.pinned,
+      visible: editForm.visible
     });
     
     showMessage(t('msg.updateSuccess'), 'success');
@@ -2792,6 +2862,85 @@ defineExpose({
   width: auto;
   margin: 0;
   cursor: pointer;
+}
+
+/* 发布选项行样式 */
+.publish-options-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  border: 1px solid #e0e4e8;
+}
+
+.publish-options-row .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #495057;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.publish-options-row .checkbox-label:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.visibility-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 8px;
+  border-left: 1px solid #dee2e6;
+}
+
+.visibility-label {
+  font-size: 14px;
+  color: #495057;
+  white-space: nowrap;
+}
+
+.visibility-dropdown {
+  padding: 6px 10px;
+  font-size: 13px;
+  min-width: 90px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: white;
+}
+
+/* 编辑对话框发布选项样式 */
+.edit-publish-options {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.visibility-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #555;
+}
+
+.visibility-dropdown-small {
+  padding: 4px 8px;
+  font-size: 13px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: white;
 }
 
 /* 单选按钮组样式 */

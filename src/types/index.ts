@@ -62,6 +62,10 @@ export interface PostMetadata {
   categories: string[];
   tags: string[];
   summary: string;
+  // 发布选项
+  allowComment?: boolean;
+  pinned?: boolean;
+  visible?: 'PUBLIC' | 'PRIVATE';
 }
 
 // 文章内容类型

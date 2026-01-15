@@ -227,9 +227,9 @@ export class HalowebWebAdaptor extends BaseExtendApi {
           deleted: false,
           publish: false,
           publishTime: new Date().toISOString(),
-          pinned: false,
-          allowComment: true,
-          visible: 'PUBLIC',
+          pinned: post.metadata.pinned ?? false,
+          allowComment: post.metadata.allowComment ?? true,
+          visible: post.metadata.visible ?? 'PUBLIC',
           priority: 0,
           excerpt: {
             autoGenerate: true,
@@ -433,13 +433,16 @@ export class HalowebWebAdaptor extends BaseExtendApi {
   }
 
   /**
-   * 更新文章元数据（标题、别名、分类、标签）
+   * 更新文章元数据（标题、别名、分类、标签、发布选项）
    */
   async updatePostMetadata(postId: string, metadata: {
     title?: string;
     slug?: string;
     categories?: string[];
     tags?: string[];
+    allowComment?: boolean;
+    pinned?: boolean;
+    visible?: 'PUBLIC' | 'PRIVATE';
   }): Promise<void> {
     try {
       // 首先获取文章当前数据 - 使用 Content API
@@ -462,6 +465,16 @@ export class HalowebWebAdaptor extends BaseExtendApi {
       }
       if (metadata.tags) {
         post.spec.tags = metadata.tags;
+      }
+      // 发布选项
+      if (metadata.allowComment !== undefined) {
+        post.spec.allowComment = metadata.allowComment;
+      }
+      if (metadata.pinned !== undefined) {
+        post.spec.pinned = metadata.pinned;
+      }
+      if (metadata.visible !== undefined) {
+        post.spec.visible = metadata.visible;
       }
 
       // 发送更新请求 - 使用 Content API
@@ -683,6 +696,10 @@ export class HalowebWebAdaptor extends BaseExtendApi {
             categoryNames: item.categories?.map((c: any) => c.spec?.displayName) || [],
             tags: item.tags?.map((t: any) => t.metadata?.name) || [],
             tagNames: item.tags?.map((t: any) => t.spec?.displayName) || [],
+            // 发布选项
+            allowComment: item.post.spec.allowComment ?? true,
+            pinned: item.post.spec.pinned ?? false,
+            visible: item.post.spec.visible ?? 'PUBLIC',
             source: 'unknown' as const  // 后续通过映射表判断
           }));
       }

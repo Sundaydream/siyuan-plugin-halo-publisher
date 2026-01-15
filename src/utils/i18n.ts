@@ -99,6 +99,12 @@ const translations: Record<Language, Record<string, string>> = {
         'publish.stepRefresh': '刷新文章列表...',
         'publish.stepDone': '发布完成！',
         'publish.clearForm': '清空表单',
+        'publish.publishOptions': '发布选项',
+        'publish.allowComment': '允许评论',
+        'publish.pinned': '置顶文章',
+        'publish.visibility': '可见性',
+        'publish.visibilityPublic': '公开',
+        'publish.visibilityPrivate': '私密',
 
         // 文章管理页
         'management.title': '文章管理',
@@ -316,6 +322,12 @@ const translations: Record<Language, Record<string, string>> = {
         'publish.stepRefresh': '刷新文章列表...',
         'publish.stepDone': '發佈完成！',
         'publish.clearForm': '清空表單',
+        'publish.publishOptions': '發佈選項',
+        'publish.allowComment': '允許評論',
+        'publish.pinned': '置頂文章',
+        'publish.visibility': '可見性',
+        'publish.visibilityPublic': '公開',
+        'publish.visibilityPrivate': '私密',
 
         // 文章管理頁
         'management.title': '文章管理',
@@ -533,6 +545,12 @@ const translations: Record<Language, Record<string, string>> = {
         'publish.stepRefresh': 'Refreshing article list...',
         'publish.stepDone': 'Complete!',
         'publish.clearForm': 'Clear Form',
+        'publish.publishOptions': 'Publish Options',
+        'publish.allowComment': 'Allow Comments',
+        'publish.pinned': 'Pin Article',
+        'publish.visibility': 'Visibility',
+        'publish.visibilityPublic': 'Public',
+        'publish.visibilityPrivate': 'Private',
 
         // Management page
         'management.title': 'Article Management',
