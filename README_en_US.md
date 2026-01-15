@@ -7,6 +7,7 @@
   <h3>Bridge between SiYuan Note and Halo Blog, providing a seamless writing and publishing experience</h3>
 </div>
 
+
 ## ⚠️ Important Notice
 
 **This plugin is AI-assisted development, open source and free, but no guarantee is made regarding functional availability. Please backup your data before and during use, and use at your own risk. The author is not responsible for any consequences caused by this plugin!**

@@ -6,6 +6,8 @@
   <img src="https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/icon.png" alt="Logo" width="120" height="120">
   <h3>连接思源笔记与 Halo 博客的桥梁，为您提供无缝的写作发布体验</h3>
 </div>
+
+
 ## ⚠️ 重要用前须知
 
 **本插件由 AI 辅助开发，开源免费，但不对功能可用性做出任何保证，使用前及使用中请自行备份数据、自行承担风险，作者对本插件造成的任何后果不负任何责任！**
