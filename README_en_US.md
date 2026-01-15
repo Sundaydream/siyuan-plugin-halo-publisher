@@ -153,4 +153,4 @@ The project is built based on **Vue 3 + TypeScript + Vite**, using a layered arc
 
 ## 📄 License
 
-This project is open sourced under the [MIT License](./LICENSE). Pull Requests or Issues are welcome for contribution.
+This project is open sourced under the [MIT License](https://github.com/Sundaydream/siyuan-plugin-halo-publisher/blob/main/LICENSE). Pull Requests or Issues are welcome for contribution.

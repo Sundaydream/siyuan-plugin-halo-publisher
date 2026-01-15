@@ -153,4 +153,4 @@
 
 ## 📄 许可证
 
-本项目采用 [MIT 许可证](./LICENSE) 开源。欢迎提交 Pull Request 或 Issue 参与贡献。
+本项目采用 [MIT 许可证](https://github.com/Sundaydream/siyuan-plugin-halo-publisher/blob/main/LICENSE) 开源。欢迎提交 Pull Request 或 Issue 参与贡献。

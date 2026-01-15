@@ -153,4 +153,4 @@
 
 ## 📄 許可證
 
-本項目採用 [MIT 許可證](./LICENSE) 開源。歡迎提交 Pull Request 或 Issue 參與貢獻。
+本項目採用 [MIT 許可證](https://github.com/Sundaydream/siyuan-plugin-halo-publisher/blob/main/LICENSE) 開源。歡迎提交 Pull Request 或 Issue 參與貢獻。
