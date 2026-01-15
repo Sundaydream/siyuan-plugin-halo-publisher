@@ -1070,16 +1070,71 @@ export class HalowebWebAdaptor extends BaseExtendApi {
       console.log('[HaloPublisher] Upload response:', result);
 
       if (result && result.metadata?.name) {
-        const uri = result.metadata.annotations?.['storage.halo.run/uri'];
-        // 返回相对路径（不拼接域名），用于正文中的图片引用
-        const url = uri || result.status?.permalink || null;
+        // 详细记录返回结构以便调试
+        console.log('[HaloPublisher] Upload result details:', {
+          name: result.metadata?.name,
+          annotations: result.metadata?.annotations,
+          spec: result.spec,
+          status: result.status
+        });
+
+        // 尝试多种方式获取图片 URL，以兼容不同存储策略插件
+        let url: string | null = null;
+
+        // 1. 检查 annotations 中的 uri（本地存储常用）
+        const uri = result.metadata?.annotations?.['storage.halo.run/uri'];
+        if (uri) {
+          url = uri;
+          console.log('[HaloPublisher] Using storage.halo.run/uri:', url);
+        }
+
+        // 2. 检查 spec.externalLink（外部存储如 GitHub OSS、S3 等常用）
+        if (!url && result.spec?.externalLink) {
+          url = result.spec.externalLink;
+          console.log('[HaloPublisher] Using spec.externalLink:', url);
+        }
+
+        // 3. 检查 status.permalink（通用后备）
+        if (!url && result.status?.permalink) {
+          url = result.status.permalink;
+          console.log('[HaloPublisher] Using status.permalink:', url);
+        }
+
+        // 4. 检查 annotations 中的 externalLink（某些插件可能放在这里）
+        if (!url && result.metadata?.annotations?.['storage.halo.run/external-link']) {
+          url = result.metadata.annotations['storage.halo.run/external-link'];
+          console.log('[HaloPublisher] Using storage.halo.run/external-link annotation:', url);
+        }
+
+        // 5. 如果仍无 URL，尝试获取附件详情（支持 GitHub OSS 等异步生成 permalink 的存储插件）
+        if (!url && result.metadata?.name) {
+          console.log('[HaloPublisher] URL not found in upload response, fetching attachment details...');
+          // 等待一小段时间让 Halo 生成 permalink
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          try {
+            const attachmentDetail = await this.getAttachmentDetail(result.metadata.name);
+            console.log('[HaloPublisher] Attachment detail:', attachmentDetail);
+
+            if (attachmentDetail?.status?.permalink) {
+              url = attachmentDetail.status.permalink;
+              console.log('[HaloPublisher] Using permalink from attachment detail:', url);
+            }
+          } catch (detailError) {
+            console.warn('[HaloPublisher] Failed to fetch attachment detail:', detailError);
+          }
+        }
+
         if (url) {
-          console.log('[HaloPublisher] Image uploaded successfully:', url);
+          console.log('[HaloPublisher] Image uploaded successfully, final URL:', url);
           // 保存到持久化缓存
           const cacheKey = `${policyName}:${fileName}`;
           await ImageCacheStore.set(cacheKey, url);
           return { url, success: true };
         }
+
+        // 如果仍然没有找到 URL，输出警告
+        console.warn('[HaloPublisher] Could not find image URL in response. Full result:', JSON.stringify(result, null, 2));
       }
 
       throw new Error('上传成功但无法获取图片 URL');
@@ -1087,6 +1142,21 @@ export class HalowebWebAdaptor extends BaseExtendApi {
       console.error('图片上传失败:', error);
       throw error;
     }
+  }
+
+  /**
+   * 获取附件详情（包含 permalink 等信息）
+   * @param attachmentName 附件名称（metadata.name）
+   * @returns 附件详情
+   */
+  private async getAttachmentDetail(attachmentName: string): Promise<any> {
+    const url = `${this.cfg.apiUrl}${this.STORAGE_API}/attachments/${attachmentName}`;
+    return await this.proxyRequest(url, {
+      method: 'GET',
+      headers: {
+        'Cookie': this.cfg.cookie
+      }
+    });
   }
 
   /**
