@@ -81,18 +81,18 @@
         <!-- 发布选项 -->
         <div class="form-group">
           <label>{{ t('publish.publishOptions') }}</label>
-          <div class="publish-options-row">
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="publishOptions.allowComment">
-              <span>{{ t('publish.allowComment') }}</span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="publishOptions.pinned">
-              <span>{{ t('publish.pinned') }}</span>
-            </label>
-            <div class="visibility-select">
-              <span class="visibility-label">{{ t('publish.visibility') }}:</span>
-              <select v-model="publishOptions.visible" class="filter-select visibility-dropdown">
+          <div class="publish-options-grid">
+            <div class="option-item">
+              <input type="checkbox" id="allowComment" v-model="publishOptions.allowComment">
+              <label for="allowComment">{{ t('publish.allowComment') }}</label>
+            </div>
+            <div class="option-item">
+              <input type="checkbox" id="pinned" v-model="publishOptions.pinned">
+              <label for="pinned">{{ t('publish.pinned') }}</label>
+            </div>
+            <div class="option-item">
+              <label for="visible">{{ t('publish.visibility') }}</label>
+              <select id="visible" v-model="publishOptions.visible">
                 <option value="PUBLIC">{{ t('publish.visibilityPublic') }}</option>
                 <option value="PRIVATE">{{ t('publish.visibilityPrivate') }}</option>
               </select>
@@ -1095,6 +1095,14 @@ onMounted(async () => {
   
   // 加载格式调整选项
   loadFormatOptions();
+
+  // 自动检查连接状态（如果配置有效）
+  if (isConfigValid.value) {
+    // 使用 setTimeout 延迟执行，确保不阻塞 UI 加载
+    setTimeout(() => {
+      recheckAuth();
+    }, 500);
+  }
 
   // 使用 props 中的 initialTab 或从 URL 参数获取
   if (props.initialTab && tabs.value.some((tabItem: { id: string }) => tabItem.id === props.initialTab)) {
@@ -2864,55 +2872,52 @@ defineExpose({
   cursor: pointer;
 }
 
-/* 发布选项行样式 */
-.publish-options-row {
+/* 发布选项网格样式 */
+.publish-options-grid {
   display: flex;
   align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  gap: 32px;
+  padding: 14px 20px;
+  background-color: #f8f9fa;
   border-radius: 8px;
-  border: 1px solid #e0e4e8;
+  border: 1px solid #e9ecef;
 }
 
-.publish-options-row .checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: #495057;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.publish-options-row .checkbox-label:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.visibility-select {
+.option-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-left: 8px;
-  border-left: 1px solid #dee2e6;
-}
-
-.visibility-label {
   font-size: 14px;
   color: #495057;
-  white-space: nowrap;
 }
 
-.visibility-dropdown {
-  padding: 6px 10px;
-  font-size: 13px;
-  min-width: 90px;
-  border: 1px solid #ced4da;
+.option-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #409eff;
+}
+
+.option-item label {
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.option-item select {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid #dcdfe6;
   border-radius: 4px;
   background-color: white;
+  cursor: pointer;
+  min-width: 80px;
+}
+
+.option-item select:focus {
+  border-color: #409eff;
+  outline: none;
 }
 
 /* 编辑对话框发布选项样式 */
