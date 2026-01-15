@@ -82,6 +82,14 @@ export class PublishStore {
     }
 
     /**
+     * 清除所有发布记录
+     */
+    static async clear(): Promise<void> {
+        recordsCache = [];
+        await this.persist();
+    }
+
+    /**
      * 根据思源文档 ID 获取记录
      */
     static getRecordBySiyuanId(siyuanId: string): PublishMapping | undefined {

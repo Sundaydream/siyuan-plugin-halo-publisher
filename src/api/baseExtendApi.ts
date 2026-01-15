@@ -245,33 +245,8 @@ export class BaseExtendApi {
           }
         }
 
-        // 如果配置了中间件 URL，则使用中间件代理请求
-        if (this.cfg.middlewareUrl) {
-          const proxyResponse = await fetch(this.cfg.middlewareUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              url,
-              options: {
-                ...options,
-                headers: {
-                  ...options.headers,
-                  'Cookie': this.cfg.cookie
-                }
-              }
-            })
-          });
-
-          if (!proxyResponse.ok) {
-            throw new Error(`中间件请求失败: ${proxyResponse.statusText}`);
-          }
-
-          return await proxyResponse.json();
-        }
-
       }
+
 
       // 最后尝试直接请求（可能遇到 CORS 问题）
       const response = await fetch(url, {

@@ -684,6 +684,46 @@
           <button @click="saveFormatOptions" class="btn-primary">{{ t('settings.saveSettings') }}</button>
         </div>
       </div>
+
+      <!-- 数据管理 -->
+      <div class="settings-section">
+        <h3>{{ t('settings.dataManagement') }}</h3>
+        <p class="section-description">{{ t('settings.dataManagementDesc') }}</p>
+        
+        <!-- 导出数据 -->
+        <div class="setting-item">
+          <div class="setting-info">
+            <label class="setting-label">{{ t('settings.exportData') }}</label>
+            <div class="setting-description">{{ t('settings.exportDataDesc') }}</div>
+          </div>
+          <div class="setting-control">
+            <button @click="exportAllData" class="btn-primary">{{ t('settings.exportBtn') }}</button>
+          </div>
+        </div>
+        
+        <!-- 导入数据 -->
+        <div class="setting-item">
+          <div class="setting-info">
+            <label class="setting-label">{{ t('settings.importData') }}</label>
+            <div class="setting-description">{{ t('settings.importDataDesc') }}</div>
+          </div>
+          <div class="setting-control">
+            <input type="file" ref="importFileInput" @change="handleImportFile" accept=".json" style="display: none">
+            <button @click="triggerImportFile" class="btn-secondary">{{ t('settings.importBtn') }}</button>
+          </div>
+        </div>
+        
+        <!-- 清除数据 -->
+        <div class="setting-item danger-zone">
+          <div class="setting-info">
+            <label class="setting-label danger-label">{{ t('settings.clearData') }}</label>
+            <div class="setting-description">{{ t('settings.clearDataDesc') }}</div>
+          </div>
+          <div class="setting-control">
+            <button @click="confirmClearData" class="btn-danger">{{ t('settings.clearBtn') }}</button>
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- 关于标签页 -->
@@ -1244,6 +1284,141 @@ const onLanguageChange = async (event: Event) => {
   const plugin = (window as any).haloPublisherPlugin;
   if (plugin && plugin.savePluginData) {
     await plugin.savePluginData('language', newLang);
+  }
+};
+
+// 数据管理功能
+const importFileInput = ref<HTMLInputElement | null>(null);
+
+// 导出所有数据
+const exportAllData = async () => {
+  try {
+    const plugin = (window as any).haloPublisherPlugin;
+    const exportData = {
+      version: '1.0',
+      exportTime: new Date().toISOString(),
+      // 网站配置（URL、Cookie）
+      config: await plugin?.loadPluginData?.('config') || {},
+      // 格式选项
+      formatOptions: await plugin?.loadPluginData?.('format-options') || {},
+      slugOptions: await plugin?.loadPluginData?.('slug-options') || {},
+      showDebug: await plugin?.loadPluginData?.('show-debug') || false,
+      // 其他设置
+      language: await plugin?.loadPluginData?.('language') || 'zh-CN',
+      storagePolicy: await plugin?.loadPluginData?.('storage-policy') || '',
+      // 持久化数据
+      publishRecords: PublishStore.getAllRecords(),
+      imageCache: ImageCacheStore.getAllEntries()
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `halo-publisher-backup-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showMessage(t('msg.exportSuccess'), 'success');
+  } catch (error) {
+    console.error('导出数据失败:', error);
+    showMessage(t('msg.saveFailed') + ': ' + (error instanceof Error ? error.message : ''), 'error');
+  }
+};
+
+// 触发导入文件选择
+const triggerImportFile = () => {
+  importFileInput.value?.click();
+};
+
+// 处理导入文件
+const handleImportFile = async (event: Event) => {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    
+    // 验证数据格式
+    if (!data.version || !data.exportTime) {
+      throw new Error('Invalid backup file format');
+    }
+    
+    const plugin = (window as any).haloPublisherPlugin;
+    
+    // 恢复配置
+    if (data.config) {
+      await plugin?.savePluginData?.('config', data.config);
+    }
+    if (data.formatOptions) {
+      await plugin?.savePluginData?.('format-options', data.formatOptions);
+    }
+    if (data.slugOptions) {
+      await plugin?.savePluginData?.('slug-options', data.slugOptions);
+    }
+    if (data.language) {
+      await plugin?.savePluginData?.('language', data.language);
+    }
+    if (data.showDebug !== undefined) {
+      await plugin?.savePluginData?.('show-debug', data.showDebug);
+    }
+    if (data.storagePolicy !== undefined) {
+      await plugin?.savePluginData?.('storage-policy', data.storagePolicy);
+    }
+    
+    // 恢复发布记录
+    if (data.publishRecords) {
+      await plugin?.savePluginData?.('publish-records', data.publishRecords);
+    }
+    
+    // 恢复图片缓存
+    if (data.imageCache) {
+      await plugin?.savePluginData?.('image-upload-cache', data.imageCache);
+    }
+    
+    showMessage(t('msg.importSuccess'), 'success');
+    // 重新加载页面以应用导入的配置
+    setTimeout(() => location.reload(), 1500);
+  } catch (e) {
+    showMessage(t('msg.importFailed') + ': ' + (e as Error).message, 'error');
+  }
+  
+  // 清空 input 以便下次选择相同文件
+  (event.target as HTMLInputElement).value = '';
+};
+
+// 确认清除数据
+const confirmClearData = () => {
+  if (confirm(t('msg.confirmClear'))) {
+    clearAllData();
+  }
+};
+
+// 清除所有数据
+const clearAllData = async () => {
+  try {
+    const plugin = (window as any).haloPublisherPlugin;
+    await plugin?.savePluginData?.('config', {});
+    await plugin?.savePluginData?.('format-options', {});
+    await plugin?.savePluginData?.('slug-options', {});
+    await plugin?.savePluginData?.('language', 'zh-CN');
+    await plugin?.savePluginData?.('show-debug', false);
+    await plugin?.savePluginData?.('storage-policy', '');
+    await plugin?.savePluginData?.('publish-records', []);
+    await plugin?.savePluginData?.('image-upload-cache', {});
+    await PublishStore.clear();
+    await ImageCacheStore.clear();
+    await plugin?.savePluginData?.('language', 'zh-CN');
+    await plugin?.savePluginData?.('storage-policy', '');
+    await plugin?.savePluginData?.('publish-records', []);
+    await plugin?.savePluginData?.('image-upload-cache', {});
+    await PublishStore.clear();
+    await ImageCacheStore.clear();
+    showMessage(t('msg.clearSuccess'), 'success');
+    setTimeout(() => location.reload(), 1500);
+  } catch (error) {
+    console.error('清除数据失败:', error);
+    showMessage(t('msg.saveFailed') + ': ' + (error instanceof Error ? error.message : ''), 'error');
   }
 };
 
@@ -2853,6 +3028,42 @@ defineExpose({
 
 .btn-small.btn-danger:hover {
   background-color: #f78989;
+}
+
+/* 独立的危险按钮样式 */
+.btn-danger {
+  background-color: #f56c6c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+  background-color: #f78989;
+}
+
+/* 危险区域样式 */
+.danger-zone {
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #fff5f5;
+  margin-top: 16px;
+}
+
+.danger-zone .danger-label {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.section-description {
+  color: #666;
+  font-size: 13px;
+  margin-bottom: 16px;
 }
 
 /* 复选框样式 */

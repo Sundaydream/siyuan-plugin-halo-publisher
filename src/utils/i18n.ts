@@ -262,6 +262,24 @@ const translations: Record<Language, Record<string, string>> = {
         'msg.createTagFailed': '创建标签失败',
         'msg.recordDeleted': '记录已删除',
         'msg.unknownError': '未知错误',
+        'msg.exportSuccess': '数据导出成功',
+        'msg.importSuccess': '数据导入成功，即将刷新页面',
+        'msg.importFailed': '数据导入失败',
+        'msg.confirmClear': '确定要清除所有插件数据吗？此操作不可恢复！',
+        'msg.clearSuccess': '数据已清除，即将刷新页面',
+
+        // 数据管理
+        'settings.dataManagement': '数据管理',
+        'settings.dataManagementDesc': '导出、导入插件配置和持久化数据，方便在不同设备间迁移',
+        'settings.exportData': '导出数据',
+        'settings.exportDataDesc': '将插件配置、发布记录、图片缓存等数据导出为 JSON 文件',
+        'settings.exportBtn': '导出',
+        'settings.importData': '导入数据',
+        'settings.importDataDesc': '从备份文件恢复配置和数据（将覆盖当前数据）',
+        'settings.importBtn': '选择文件导入',
+        'settings.clearData': '清除所有数据',
+        'settings.clearDataDesc': '⚠️ 危险操作：删除所有插件配置、发布记录和缓存数据，此操作不可恢复',
+        'settings.clearBtn': '清除所有数据',
     },
 
     'zh-TW': {
@@ -485,6 +503,24 @@ const translations: Record<Language, Record<string, string>> = {
         'msg.createTagFailed': '創建標籤失敗',
         'msg.recordDeleted': '記錄已刪除',
         'msg.unknownError': '未知錯誤',
+        'msg.exportSuccess': '數據導出成功',
+        'msg.importSuccess': '數據導入成功，即將刷新頁面',
+        'msg.importFailed': '數據導入失敗',
+        'msg.confirmClear': '確定要清除所有插件數據嗎？此操作不可恢復！',
+        'msg.clearSuccess': '數據已清除，即將刷新頁面',
+
+        // 數據管理
+        'settings.dataManagement': '數據管理',
+        'settings.dataManagementDesc': '導出、導入插件配置和持久化數據，方便在不同設備間遷移',
+        'settings.exportData': '導出數據',
+        'settings.exportDataDesc': '將插件配置、發佈記錄、圖片緩存等數據導出為 JSON 文件',
+        'settings.exportBtn': '導出',
+        'settings.importData': '導入數據',
+        'settings.importDataDesc': '從備份文件恢復配置和數據（將覆蓋當前數據）',
+        'settings.importBtn': '選擇文件導入',
+        'settings.clearData': '清除所有數據',
+        'settings.clearDataDesc': '⚠️ 危險操作：刪除所有插件配置、發佈記錄和緩存數據，此操作不可恢復',
+        'settings.clearBtn': '清除所有數據',
     },
 
     'en': {
@@ -708,6 +744,24 @@ const translations: Record<Language, Record<string, string>> = {
         'msg.createTagFailed': 'Failed to create tag',
         'msg.recordDeleted': 'Record deleted',
         'msg.unknownError': 'Unknown error',
+        'msg.exportSuccess': 'Data exported successfully',
+        'msg.importSuccess': 'Data imported successfully, page will refresh',
+        'msg.importFailed': 'Data import failed',
+        'msg.confirmClear': 'Are you sure you want to clear all plugin data? This cannot be undone!',
+        'msg.clearSuccess': 'Data cleared, page will refresh',
+
+        // Data management
+        'settings.dataManagement': 'Data Management',
+        'settings.dataManagementDesc': 'Export and import plugin configuration and data for migration between devices',
+        'settings.exportData': 'Export Data',
+        'settings.exportDataDesc': 'Export plugin settings, publish records, and image cache to a JSON file',
+        'settings.exportBtn': 'Export',
+        'settings.importData': 'Import Data',
+        'settings.importDataDesc': 'Restore configuration and data from a backup file (will overwrite current data)',
+        'settings.importBtn': 'Select File to Import',
+        'settings.clearData': 'Clear All Data',
+        'settings.clearDataDesc': '⚠️ Danger: Delete all plugin settings, publish records, and cache data. This cannot be undone',
+        'settings.clearBtn': 'Clear All Data',
     }
 };
 

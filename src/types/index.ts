@@ -3,7 +3,6 @@ export interface PluginConfig {
   url: string;
   apiUrl: string;
   home: string;
-  middlewareUrl: string;
   picbedType: string;
   cookie: string;
   storagePolicyName?: string; // 存储策略名称，如 'attachment-policy-xxx'

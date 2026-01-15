@@ -2,7 +2,7 @@ import { PluginConfig } from '../types';
 
 // 默认配置常量
 const DEFAULT_CONFIG: Partial<PluginConfig> = {
-  middlewareUrl: 'https://api.terwer.space/api/middleware',
+  home: '',
   picbedType: 'local',
 };
 
