@@ -177,7 +177,7 @@
             v-if="previewMode === 'edit'"
             id="postContent" 
             v-model="postForm.content" 
-            :placeholder="t('publish.summaryPlaceholder')"
+            :placeholder="t('publish.contentPlaceholder')"
             rows="12"
           ></textarea>
           <div 
@@ -228,7 +228,6 @@
 
       <!-- Halo 文章视图 -->
       <div v-if="viewMode === 'halo'">
-        <!-- 筛选工具栏 -->
         <div class="filter-toolbar">
           <div class="filter-row">
             <input 
@@ -237,19 +236,28 @@
               :placeholder="t('management.search')"
               class="search-input"
             >
-            <select v-model="filterCategory" class="filter-select">
-              <option value="">{{ t('management.filterAll') }}</option>
-              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-            </select>
-            <select v-model="filterTag" class="filter-select">
-              <option value="">{{ t('management.filterAll') }}</option>
-              <option v-for="tag in tags" :key="tag.id" :value="tag.id">{{ tag.name }}</option>
-            </select>
-            <select v-model="filterSource" class="filter-select">
-              <option value="">{{ t('management.filterAll') }}</option>
-              <option value="plugin">{{ t('management.sourcePlugin') }}</option>
-              <option value="halo">{{ t('management.sourceHalo') }}</option>
-            </select>
+            <div class="filter-group">
+              <label class="filter-label">{{ t('management.categories') }}</label>
+              <select v-model="filterCategory" class="filter-select">
+                <option value="">{{ t('management.filterAll') }}</option>
+                <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">{{ t('management.tags') }}</label>
+              <select v-model="filterTag" class="filter-select">
+                <option value="">{{ t('management.filterAll') }}</option>
+                <option v-for="tag in tags" :key="tag.id" :value="tag.id">{{ tag.name }}</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">{{ t('management.source') }}</label>
+              <select v-model="filterSource" class="filter-select">
+                <option value="">{{ t('management.filterAll') }}</option>
+                <option value="plugin">{{ t('management.sourcePlugin') }}</option>
+                <option value="halo">{{ t('management.sourceHalo') }}</option>
+              </select>
+            </div>
             <button @click="fetchPublishedPosts" class="btn-secondary" :disabled="!isConfigValid">{{ t('management.refresh') }}</button>
           </div>
         </div>
@@ -313,14 +321,20 @@
               :placeholder="t('management.search')"
               class="search-input"
             >
-            <select v-model="siyuanFilterCategory" class="filter-select">
-              <option value="">{{ t('management.filterAll') }}</option>
-              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-            </select>
-            <select v-model="siyuanFilterTag" class="filter-select">
-              <option value="">{{ t('management.filterAll') }}</option>
-              <option v-for="tag in tags" :key="tag.id" :value="tag.id">{{ tag.name }}</option>
-            </select>
+            <div class="filter-group">
+              <label class="filter-label">{{ t('management.categories') }}</label>
+              <select v-model="siyuanFilterCategory" class="filter-select">
+                <option value="">{{ t('management.filterAll') }}</option>
+                <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">{{ t('management.tags') }}</label>
+              <select v-model="siyuanFilterTag" class="filter-select">
+                <option value="">{{ t('management.filterAll') }}</option>
+                <option v-for="tag in tags" :key="tag.id" :value="tag.id">{{ tag.name }}</option>
+              </select>
+            </div>
             <button @click="fetchSiyuanNotes" class="btn-secondary">{{ t('management.refreshStatus') }}</button>
           </div>
         </div>
@@ -673,6 +687,7 @@ import { SiyuanUtils } from './utils/siyuanUtils';
 import { SlugUtils } from './utils/slugUtils';
 import { Post, Category, Tag, SlugOptions, SiyuanNoteItem } from './types';
 import { PublishStore } from './utils/publishStore';
+import { ImageCacheStore } from './utils/imageCacheStore';
 import { t, currentLanguage, setLanguage, languageOptions, Language } from './utils/i18n';
 
 // 定义 props
@@ -1020,6 +1035,9 @@ onMounted(async () => {
   
   // 初始化发布记录存储
   await PublishStore.init();
+  
+  // 初始化图片上传缓存
+  await ImageCacheStore.init();
   
   // 加载格式调整选项
   loadFormatOptions();
@@ -1729,10 +1747,19 @@ const updateToHalo = async (noteItem: SiyuanNoteItem) => {
   isUpdating.value = noteItem.id;
   try {
     const doc = await SiyuanUtils.getDocById(noteItem.id);
+    
+    // 使用全局默认存储策略（更新时使用与新发布相同的策略）
+    const effectiveStoragePolicy = selectedStoragePolicy.value;
+    console.log('[HaloPublisher] Using storage policy for update:', effectiveStoragePolicy || 'default-policy');
+    
     const config = useHalowebWeb({
       url: configForm.url,
       cookie: configForm.cookie
     });
+    // 添加存储策略到配置
+    if (effectiveStoragePolicy) {
+      config.storagePolicyName = effectiveStoragePolicy;
+    }
     const adaptor = new HalowebWebAdaptor(config);
     
     await adaptor.updatePostContent(noteItem.haloId, doc.title, doc.rawContent, doc.coverImage);
@@ -2107,8 +2134,20 @@ defineExpose({
 .filter-row {
   display: flex;
   gap: 12px;
-  align-items: center;
+  align-items: flex-end;
   flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-label {
+  font-size: 12px;
+  color: #606266;
+  font-weight: 500;
 }
 
 .search-input {

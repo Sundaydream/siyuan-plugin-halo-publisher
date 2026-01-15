@@ -10,6 +10,7 @@ import {
   ImageUploadResult
 } from '../types';
 import { LuteUtil } from '../utils/luteUtil';
+import { ImageCacheStore } from '../utils/imageCacheStore';
 
 /**
  * Halo Web 适配器类，负责处理文章的发布、编辑、删除等生命周期管理
@@ -18,9 +19,6 @@ export class HalowebWebAdaptor extends BaseExtendApi {
   private readonly CONSOLE_API = 'apis/api.console.halo.run/v1alpha1';
   private readonly CONTENT_API = 'apis/content.halo.run/v1alpha1';
   private readonly STORAGE_API = 'apis/storage.halo.run/v1alpha1';
-
-  // 图片上传缓存：文件名 -> 已上传的 URL（避免重复上传）
-  private static imageUploadCache: Map<string, string> = new Map();
 
   constructor(config: PluginConfig) {
     super(config);
@@ -969,10 +967,14 @@ export class HalowebWebAdaptor extends BaseExtendApi {
     try {
       const fileName = this.getFileNameFromUrl(imageUrl);
 
-      // 检查缓存
-      if (HalowebWebAdaptor.imageUploadCache.has(fileName)) {
-        const cachedUrl = HalowebWebAdaptor.imageUploadCache.get(fileName);
-        console.log('[HaloPublisher] Using cached image for upload:', fileName);
+      // 缓存 key 包含策略名称，避免不同策略的图片混淆
+      const policyName = this.cfg.storagePolicyName || 'default-policy';
+      const cacheKey = `${policyName}:${fileName}`;
+
+      // 检查持久化缓存
+      if (ImageCacheStore.has(cacheKey)) {
+        const cachedUrl = ImageCacheStore.get(cacheKey);
+        console.log('[HaloPublisher] Using cached image for upload:', cacheKey);
         return {
           url: cachedUrl!,
           success: true
@@ -995,7 +997,6 @@ export class HalowebWebAdaptor extends BaseExtendApi {
       // 使用 TextEncoder 编码文本部分
       const textEncoder = new TextEncoder();
 
-      const policyName = this.cfg.storagePolicyName || 'default-policy';
       console.log('[HaloPublisher] Using storage policy:', policyName);
 
       const policyPart = textEncoder.encode(
@@ -1057,9 +1058,9 @@ export class HalowebWebAdaptor extends BaseExtendApi {
         const url = uri || result.status?.permalink || null;
         if (url) {
           console.log('[HaloPublisher] Image uploaded successfully:', url);
-          // 保存到缓存
-          const fileName = this.getFileNameFromUrl(imageUrl);
-          HalowebWebAdaptor.imageUploadCache.set(fileName, url);
+          // 保存到持久化缓存
+          const cacheKey = `${policyName}:${fileName}`;
+          await ImageCacheStore.set(cacheKey, url);
           return { url, success: true };
         }
       }
