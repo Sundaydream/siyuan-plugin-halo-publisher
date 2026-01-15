@@ -1,6 +1,6 @@
 # SiYuan Note Halo Publisher Plugin
 
-[简体中文](https://github.com/Sundaydream/siyuan-plugin-halo-publisher/blob/main/README.md) | [繁體中文](https://github.com/Sundaydream/siyuan-plugin-halo-publisher/blob/main/README_zh_TW.md)
+[简体中文](https://github.com/Sundaydream/siyuan-plugin-halo-publisher/blob/main/README.md) | [繁體中文](https://github.com/Sundaydream/siyuan-plugin-halo-publisher/blob/main/README_zh_CHT.md)
 
 <div align="center">
   <img src="https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/icon.png" alt="Logo" width="120" height="120">

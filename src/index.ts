@@ -2,7 +2,7 @@ import { Plugin, showMessage, Menu, Dialog, fetchSyncPost } from "siyuan";
 import PluginInfo from '../plugin.json';
 import { createApp } from 'vue';
 import App from './App.vue';
-import { t } from './utils/i18n';
+import { t, setLanguage, Language } from './utils/i18n';
 
 // 定义插件图标 SVG（云端上传图标）
 const ICON_SVG = `<symbol id="iconHalo" viewBox="0 0 24 24">
@@ -15,6 +15,28 @@ export default class HaloPublisherPlugin extends Plugin {
 
   async onload() {
     console.log('Halo Publisher Plugin loaded, version:', PluginInfo.version);
+
+    // 同步思源语言设置
+    try {
+      const siyuanLang = (window as any).siyuan?.config?.lang || 'zh_CN';
+      let targetLang: Language = 'zh-CN';
+      switch (siyuanLang) {
+        case 'zh_CN':
+          targetLang = 'zh-CN';
+          break;
+        case 'zh_CHT':
+          targetLang = 'zh-CHT';
+          break;
+        case 'en_US':
+        default:
+          targetLang = 'en';
+          break;
+      }
+      setLanguage(targetLang);
+      console.log(`[HaloPublisher] Synced language from SiYuan: ${siyuanLang} -> ${targetLang}`);
+    } catch (e) {
+      console.warn('[HaloPublisher] Failed to sync language:', e);
+    }
 
     // 添加自定义图标
     this.addIcons(ICON_SVG);

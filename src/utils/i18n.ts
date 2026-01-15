@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 
 // 支持的语言类型
-export type Language = 'zh-CN' | 'zh-TW' | 'en';
+export type Language = 'zh-CN' | 'zh-CHT' | 'en';
 
 // 语言存储的 key
 const LANGUAGE_STORAGE_KEY = 'halo-publisher-language';
@@ -13,7 +13,7 @@ export const currentLanguage = ref<Language>(loadLanguage());
 function loadLanguage(): Language {
     try {
         const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-        if (saved && ['zh-CN', 'zh-TW', 'en'].includes(saved)) {
+        if (saved && ['zh-CN', 'zh-CHT', 'en'].includes(saved)) {
             return saved as Language;
         }
     } catch (e) {
@@ -35,7 +35,7 @@ export function setLanguage(lang: Language) {
 // 语言选项列表
 export const languageOptions = [
     { value: 'zh-CN', label: '简体中文' },
-    { value: 'zh-TW', label: '繁體中文' },
+    { value: 'zh-CHT', label: '繁體中文' },
     { value: 'en', label: 'English' }
 ];
 
@@ -282,7 +282,7 @@ const translations: Record<Language, Record<string, string>> = {
         'settings.clearBtn': '清除所有数据',
     },
 
-    'zh-TW': {
+    'zh-CHT': {
         // 標籤頁
         'tab.publish': '文章發佈',
         'tab.management': '文章管理',

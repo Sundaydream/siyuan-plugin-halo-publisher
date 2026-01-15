@@ -52,7 +52,7 @@
 
 #### 1.2 建立連接
 
-![image-20260116000215441](https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/README_zh_TW.assets/image-20260116000215441.png)
+![image-20260116000215441](https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/README_zh_CHT.assets/image-20260116000215441.png)
 
 初次使用需配置 Halo 站點信息：
 1. 點擊頂欄 Halo 圖標，進入 **通用設置** 標籤頁。
@@ -68,7 +68,7 @@
 
 ### 2. 文章發佈流程
 
-![image-20260116000251203](https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/README_zh_TW.assets/image-20260116000251203.png)
+![image-20260116000251203](https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/README_zh_CHT.assets/image-20260116000251203.png)
 
 #### 2.1 準備文章
 在思源筆記中完成文章撰寫。
