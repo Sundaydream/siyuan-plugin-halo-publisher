@@ -1,9 +1,9 @@
 # 思源笔记 Halo 发布插件
 
-[English](README_en_US.md) | [繁體中文](README_zh_TW.md)
+[English](https://github.com/Sundaydream/siyuan-plugin-halo-publisher/blob/main/README_en_US.md) | [繁體中文](https://github.com/Sundaydream/siyuan-plugin-halo-publisher/blob/main/README_zh_TW.md)
 
 <div align="center">
-  <img src="./icon.png" alt="Logo" width="120" height="120">
+  <img src="https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/icon.png" alt="Logo" width="120" height="120">
   <h3>连接思源笔记与 Halo 博客的桥梁，为您提供无缝的写作发布体验</h3>
 </div>
 ## ⚠️ 重要用前须知
@@ -26,7 +26,7 @@
 - **丰富参数**：支持文章内容、标题、元数据（Slug、摘要）等的设置。
 - **图片处理**：
   - **自动图床**：自动解析并上传笔记内的本地图片到 Halo 附件库。
-  - **云端兼容**：支持 Halo 的 GitHub OSS 等第三方存储插件**（部分 Halo 插件会导致无法上传图片到 Halo 本地存储库，这不是本插件的 bug ，请去对应的 Halo 插件处反馈）**。
+  - **云端兼容**：支持 Halo 的 GitHub OSS 等第三方存储插件 **（部分 Halo 插件会导致无法上传图片到 Halo 本地存储库，这不是本插件的 bug ，请去对应的 Halo 插件处反馈）**。
   - **智能去重**：图片去重机制，避免重复上传。
 - **隐私安全**：所有请求直接通过思源内核代理，**零第三方中转**，Token 与配置仅存储于本地。
 - **数据自由**：提供完整的配置与数据导入/导出功能，方便跨设备迁移或备份。
@@ -50,7 +50,7 @@
 
 #### 1.2 建立连接
 
-![image-20260115234546584](README.assets/image-20260115234546584.png)
+![image-20260115234546584](https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/README.assets/image-20260115234546584.png)
 
 初次使用需配置 Halo 站点信息：
 1. 点击顶栏 Halo 图标，进入 **通用设置** 标签页。
@@ -66,7 +66,7 @@
 
 ### 2. 文章发布流程
 
-![image-20260115234402942](README.assets/image-20260115234402942.png)
+![image-20260115234402942](https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/README.assets/image-20260115234402942.png)
 
 #### 2.1 准备文章
 在思源笔记中完成文章撰写。

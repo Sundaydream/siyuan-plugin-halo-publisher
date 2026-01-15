@@ -67,6 +67,10 @@ export default defineConfig(({
             src: "./plugin.json",
             dest: "./",
           },
+          {
+            src: "./preview.png",
+            dest: "./",
+          },
         ],
       }),
     ],

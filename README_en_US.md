@@ -1,9 +1,9 @@
 # SiYuan Note Halo Publisher Plugin
 
-[简体中文](README.md) | [繁體中文](README_zh_TW.md)
+[简体中文](https://github.com/Sundaydream/siyuan-plugin-halo-publisher/blob/main/README.md) | [繁體中文](https://github.com/Sundaydream/siyuan-plugin-halo-publisher/blob/main/README_zh_TW.md)
 
 <div align="center">
-  <img src="./icon.png" alt="Logo" width="120" height="120">
+  <img src="https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/icon.png" alt="Logo" width="120" height="120">
   <h3>Bridge between SiYuan Note and Halo Blog, providing a seamless writing and publishing experience</h3>
 </div>
 
@@ -51,7 +51,7 @@ Search and install directly in the SiYuan Note Bazaar, or:
 
 #### 1.2 Establish Connection
 
-![image-20260116000416251](README_en_US.assets/image-20260116000416251.png)
+![image-20260116000416251](https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/README_en_US.assets/image-20260116000416251.png)
 
 Initial use requires configuring Halo site information:
 1. Click the Halo icon in the top bar to enter the **General Settings** tab.
@@ -67,7 +67,7 @@ Initial use requires configuring Halo site information:
 
 ### 2. Article Publishing Flow
 
-![image-20260116000437229](README_en_US.assets/image-20260116000437229.png)
+![image-20260116000437229](https://cdn.jsdelivr.net/gh/Sundaydream/siyuan-plugin-halo-publisher@main/README_en_US.assets/image-20260116000437229.png)
 
 #### 2.1 Prepare Article
 Complete article writing in SiYuan Note.
@@ -95,7 +95,7 @@ In the **Article Management** tab, you can view all associated articles:
 
 ### 4. Data Backup & Migration
 
-To prevent data loss or facilitate multi-device use, the plugin provides comprehensive data management functions (located at the bottom of **General Settings**):
+
 
 - **Export Data**: Generate a JSON backup file containing all configurations, publish records (SiYuan ID ↔ Halo ID mapping), and image cache.
 - **Import Data**: Restore a previous backup (Note: Import operation will overwrite current configuration, and site URL and Cookie will not be imported, requiring re-login).
