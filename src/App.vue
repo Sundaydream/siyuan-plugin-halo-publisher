@@ -176,9 +176,14 @@
           <textarea 
             id="postSummary" 
             v-model="postForm.summary" 
-            :placeholder="t('publish.summaryPlaceholder')"
             rows="2"
           ></textarea>
+          <div class="summary-options">
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="postForm.autoGenerateSummary" :disabled="!!postForm.summary">
+              <span>{{ t('publish.autoGenerateSummary') }}</span>
+            </label>
+          </div>
         </div>
         
         <div class="form-group">
@@ -440,6 +445,20 @@
             <div class="edit-form-group">
               <label class="edit-label">{{ t('publish.slug') }}</label>
               <input type="text" v-model="editForm.slug" class="edit-input" placeholder="留空自动生成">
+            </div>
+            <div class="edit-form-group">
+              <label class="edit-label">{{ t('management.summary') }}</label>
+              <textarea 
+                v-model="editForm.summary" 
+                class="edit-input edit-textarea" 
+                rows="3"
+              ></textarea>
+              <div class="summary-options">
+                <label class="checkbox-label">
+                  <input type="checkbox" v-model="editForm.autoGenerateSummary" :disabled="!!editForm.summary">
+                  <span>{{ t('publish.autoGenerateSummary') }}</span>
+                </label>
+              </div>
             </div>
             <div class="edit-form-group">
               <label class="edit-label">{{ t('publish.category') }}</label>
@@ -871,6 +890,7 @@ const postForm = reactive({
   categories: [] as string[],
   tags: [] as string[],
   summary: '',
+  autoGenerateSummary: false, // 默认不勾选，避免发布时自动生成覆盖了可能的意图
   content: '',
   rawContent: '',
   format: 'markdown' as 'markdown' | 'html',
@@ -879,6 +899,13 @@ const postForm = reactive({
 
 // 视图模式：halo 文章列表 | 思源笔记列表
 const viewMode = ref<'halo' | 'siyuan'>('halo');
+
+// 监听发布页摘要变化，如果有内容则取消自动生成
+watch(() => postForm.summary, (newVal) => {
+  if (newVal && newVal.trim().length > 0) {
+    postForm.autoGenerateSummary = false;
+  }
+});
 
 // 已发布文章列表
 const publishedPosts = ref<any[]>([]);
@@ -914,7 +941,9 @@ const editForm = reactive({
   // 发布选项
   allowComment: true,
   pinned: false,
-  visible: 'PUBLIC' as 'PUBLIC' | 'PRIVATE'
+  visible: 'PUBLIC' as 'PUBLIC' | 'PRIVATE',
+  summary: '',
+  autoGenerateSummary: true
 });
 
 // 分类和标签
@@ -1772,7 +1801,8 @@ const publishPost = async () => {
         // 发布选项
         allowComment: publishOptions.allowComment,
         pinned: publishOptions.pinned,
-        visible: publishOptions.visible
+        visible: publishOptions.visible,
+        autoGenerateSummary: postForm.autoGenerateSummary
       },
       content: {
         content: processedContent,
@@ -1890,6 +1920,8 @@ const openEditDialog = (post: any) => {
   editForm.allowComment = post.allowComment ?? true;
   editForm.pinned = post.pinned ?? false;
   editForm.visible = post.visible ?? 'PUBLIC';
+  editForm.summary = post.summary || '';
+  editForm.autoGenerateSummary = post.autoGenerateSummary ?? true;
   showEditDialog.value = true;
 };
 
@@ -1898,6 +1930,7 @@ const closeEditDialog = () => {
   showEditDialog.value = false;
   editingPostId.value = '';
   editForm.title = '';
+  editForm.summary = '';
   editForm.slug = '';
   editForm.categories = [];
   editForm.tags = [];
@@ -1905,6 +1938,8 @@ const closeEditDialog = () => {
   editForm.allowComment = true;
   editForm.pinned = false;
   editForm.visible = 'PUBLIC';
+  editForm.summary = '';
+  editForm.autoGenerateSummary = true;
 };
 
 // 切换编辑表单中的分类
@@ -1947,7 +1982,9 @@ const saveEditForm = async () => {
       // 发布选项
       allowComment: editForm.allowComment,
       pinned: editForm.pinned,
-      visible: editForm.visible
+      visible: editForm.visible,
+      summary: editForm.summary,
+      autoGenerateSummary: editForm.autoGenerateSummary
     });
     
     showMessage(t('msg.updateSuccess'), 'success');
@@ -2688,6 +2725,16 @@ defineExpose({
 .edit-input:focus {
   border-color: var(--hp-primary);
   outline: none;
+}
+
+.edit-textarea {
+  resize: vertical;
+  font-family: inherit;
+  min-height: 80px;
+}
+
+.summary-options {
+  margin-top: 8px;
 }
 
 .taxonomy-edit-box {

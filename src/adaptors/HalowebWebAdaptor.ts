@@ -255,7 +255,10 @@ export class HalowebWebAdaptor extends BaseExtendApi {
     };
 
     // 摘要
-    if (post.metadata.summary) {
+    if (post.metadata.autoGenerateSummary !== undefined) {
+      params.post.spec.excerpt.autoGenerate = post.metadata.autoGenerateSummary;
+      params.post.spec.excerpt.raw = post.metadata.summary || '';
+    } else if (post.metadata.summary) {
       params.post.spec.excerpt.autoGenerate = false;
       params.post.spec.excerpt.raw = post.metadata.summary;
     }
@@ -442,6 +445,8 @@ export class HalowebWebAdaptor extends BaseExtendApi {
     allowComment?: boolean;
     pinned?: boolean;
     visible?: 'PUBLIC' | 'PRIVATE';
+    summary?: string;
+    autoGenerateSummary?: boolean;
   }): Promise<void> {
     try {
       // 首先获取文章当前数据 - 使用 Content API
@@ -459,6 +464,14 @@ export class HalowebWebAdaptor extends BaseExtendApi {
       // 更新 spec 中的字段
       if (metadata.title) post.spec.title = metadata.title;
       if (metadata.slug) post.spec.slug = metadata.slug;
+      if (metadata.summary !== undefined) {
+        if (!post.spec.excerpt) post.spec.excerpt = {};
+        post.spec.excerpt.raw = metadata.summary;
+      }
+      if (metadata.autoGenerateSummary !== undefined) {
+        if (!post.spec.excerpt) post.spec.excerpt = {};
+        post.spec.excerpt.autoGenerate = metadata.autoGenerateSummary;
+      }
       if (metadata.categories) {
         post.spec.categories = metadata.categories;
       }
@@ -699,6 +712,8 @@ export class HalowebWebAdaptor extends BaseExtendApi {
             allowComment: item.post.spec.allowComment ?? true,
             pinned: item.post.spec.pinned ?? false,
             visible: item.post.spec.visible ?? 'PUBLIC',
+            summary: item.post.spec.excerpt?.raw || '',
+            autoGenerateSummary: item.post.spec.excerpt?.autoGenerate ?? true,
             source: 'unknown' as const  // 后续通过映射表判断
           }));
       }
@@ -743,7 +758,8 @@ export class HalowebWebAdaptor extends BaseExtendApi {
           coverImage: post.spec?.cover || '',
           categories: postData.categories?.map((cat: any) => cat.spec?.displayName || cat.metadata?.name) || [],
           tags: postData.tags?.map((tag: any) => tag.spec?.displayName || tag.metadata?.name) || [],
-          summary: post.spec?.excerpt?.raw || ''
+          summary: post.spec?.excerpt?.raw || '',
+          autoGenerateSummary: post.spec?.excerpt?.autoGenerate ?? true
         },
         content: {
           content: postData.content?.content || '',

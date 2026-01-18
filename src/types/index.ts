@@ -61,6 +61,7 @@ export interface PostMetadata {
   categories: string[];
   tags: string[];
   summary: string;
+  autoGenerateSummary?: boolean;
   // 发布选项
   allowComment?: boolean;
   pinned?: boolean;
@@ -149,6 +150,8 @@ export interface PublishedPost {
   status: string;
   url: string;
   slug?: string;
+  summary?: string;
+  autoGenerateSummary?: boolean;
   cover?: string;
   categories?: string[];      // 分类 ID (metadata.name)
   categoryNames?: string[];   // 分类显示名称
