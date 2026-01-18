@@ -393,7 +393,7 @@
                     <span v-if="!item.tagNames?.length" class="no-data">-</span>
                   </td>
                   <td>
-                    <span v-if="item.isDeleted" class="status-badge status-deleted" style="background-color: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2;">{{ t('management.statusDeleted') }}</span>
+                    <span v-if="item.isDeleted" class="status-badge status-deleted">{{ t('management.statusDeleted') }}</span>
                     <span v-else-if="item.isModified" class="status-badge status-modified">{{ t('management.statusModified') }}</span>
                     <span v-else class="status-badge status-synced">{{ t('management.statusSynced') }}</span>
                   </td>
@@ -2227,8 +2227,12 @@ defineExpose({
   --hp-success-border: #e1f3d8;
   --hp-success-dim: rgba(103, 194, 58, 0.1);
   --hp-warning: #e6a23c;
+  --hp-warning-light: #fdf6ec; /* Added */
+  --hp-warning-border: #faecd8; /* Added */
   --hp-warning-dim: rgba(230, 162, 60, 0.1);
   --hp-error: #f56c6c;
+  --hp-error-light: #ffebee; /* Added */
+  --hp-error-border: #ffcdd2; /* Added */
   --hp-error-dim: rgba(245, 108, 108, 0.1);
   --hp-text-primary: #333333;
   --hp-text-regular: #606266;
@@ -2262,8 +2266,12 @@ defineExpose({
   --hp-success-border: var(--b3-theme-success);
   --hp-success-dim: rgba(103, 194, 58, 0.2);
   --hp-warning: var(--b3-theme-warning);
+  --hp-warning-light: rgba(230, 162, 60, 0.2); /* Added */
+  --hp-warning-border: rgba(230, 162, 60, 0.3); /* Added */
   --hp-warning-dim: rgba(230, 162, 60, 0.2);
   --hp-error: var(--b3-theme-error);
+  --hp-error-light: rgba(245, 108, 108, 0.2); /* Added */
+  --hp-error-border: rgba(245, 108, 108, 0.3); /* Added */
   --hp-error-dim: rgba(245, 108, 108, 0.2);
   --hp-text-primary: var(--b3-theme-on-surface);
   --hp-text-regular: var(--b3-theme-on-surface-light);
@@ -2409,15 +2417,21 @@ defineExpose({
 }
 
 .status-modified {
-  background: #fdf6ec;
-  color: #e6a23c;
-  border: 1px solid #faecd8;
+  background: var(--hp-warning-light);
+  color: var(--hp-warning);
+  border: 1px solid var(--hp-warning-border);
 }
 
 .status-synced {
-  background: #f0f9eb;
-  color: #67c23a;
-  border: 1px solid #e1f3d8;
+  background: var(--hp-success-light);
+  color: var(--hp-success);
+  border: 1px solid var(--hp-success-border);
+}
+
+.status-deleted {
+  background: var(--hp-error-light);
+  color: var(--hp-error);
+  border: 1px solid var(--hp-error-border);
 }
 
 /* 表格样式 */
