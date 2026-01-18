@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" :class="{ 'theme-dark': isDarkMode }">
     <!-- 标签页导航 -->
     <div class="tabs">
       <div 
@@ -2116,6 +2116,49 @@ const formatDate = (dateString: string) => {
 };
 
 // 暴露方法给外部访问
+// 主题检测
+const isDarkMode = ref(false);
+
+const checkTheme = () => {
+  const html = document.querySelector('html');
+  if (html) {
+    const themeMode = html.getAttribute('data-theme-mode');
+    isDarkMode.value = themeMode === 'dark';
+  }
+};
+
+onMounted(async () => {
+  // 保存插件实例引用
+  if (props.plugin) {
+    (window as any).haloPublisherPlugin = props.plugin;
+  }
+  
+  // 初始化主题检测
+  checkTheme();
+  
+  // 监听主题变化
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme-mode') {
+        checkTheme();
+      }
+    });
+  });
+  
+  const html = document.querySelector('html');
+  if (html) {
+    observer.observe(html, { attributes: true });
+  }
+});
+
+// Watch initialTab prop
+watch(() => props.initialTab, (newTab) => {
+  if (newTab) {
+    activeTab.value = newTab;
+  }
+}, { immediate: true });
+
+// 暴露方法给外部访问
 defineExpose({
   switchTab
 });
@@ -2123,21 +2166,70 @@ defineExpose({
 
 <style scoped>
 .app-container {
+  /* 恢复浅色模式配色 (Light Mode) */
+  --hp-primary: #409eff;
+  --hp-primary-light: #ecf5ff;
+  --hp-primary-dim: rgba(64, 158, 255, 0.1);
+  --hp-success: #67c23a;
+  --hp-success-light: #f0f9eb;
+  --hp-success-border: #e1f3d8;
+  --hp-success-dim: rgba(103, 194, 58, 0.1);
+  --hp-warning: #e6a23c;
+  --hp-warning-dim: rgba(230, 162, 60, 0.1);
+  --hp-error: #f56c6c;
+  --hp-error-dim: rgba(245, 108, 108, 0.1);
+  --hp-text-primary: #333333;
+  --hp-text-regular: #606266;
+  --hp-text-secondary: #909399;
+  --hp-text-on-primary: #ffffff;
+  --hp-border: #dcdfe6;
+  --hp-border-light: #eaeaea;
+  --hp-bg-base: #f5f5f5;
+  --hp-bg-surface: #ffffff;
+  --hp-bg-surface-light: #f5f7fa;
+  --hp-mask: rgba(0, 0, 0, 0.5);
+
   max-width: 1200px;
   margin: 0 auto;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f5f5f5;
+  background-color: var(--hp-bg-base);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
+/* 深色模式适配 (Dark Mode Overrides) */
+/* 使用 .theme-dark 类进行更强的级联覆盖 */
+.app-container.theme-dark {
+  --hp-primary: var(--b3-theme-primary);
+  --hp-primary-light: rgba(64, 158, 255, 0.2);
+  --hp-primary-dim: rgba(64, 158, 255, 0.2);
+  --hp-success: var(--b3-theme-success);
+  --hp-success-light: rgba(103, 194, 58, 0.2);
+  --hp-success-border: var(--b3-theme-success);
+  --hp-success-dim: rgba(103, 194, 58, 0.2);
+  --hp-warning: var(--b3-theme-warning);
+  --hp-warning-dim: rgba(230, 162, 60, 0.2);
+  --hp-error: var(--b3-theme-error);
+  --hp-error-dim: rgba(245, 108, 108, 0.2);
+  --hp-text-primary: var(--b3-theme-on-surface);
+  --hp-text-regular: var(--b3-theme-on-surface-light);
+  --hp-text-secondary: var(--b3-theme-on-surface-light);
+  --hp-text-on-primary: var(--b3-theme-on-primary);
+  --hp-border: var(--b3-border-color);
+  --hp-border-light: var(--b3-border-color);
+  --hp-bg-base: var(--b3-theme-background);
+  --hp-bg-surface: var(--b3-theme-surface);
+  --hp-bg-surface-light: var(--b3-theme-background-light);
+  --hp-mask: rgba(0, 0, 0, 0.7);
+}
+
 /* 标签页样式 */
 .tabs {
   display: flex;
-  background-color: white;
-  border-bottom: 1px solid #eaeaea;
+  background-color: var(--hp-bg-surface);
+  border-bottom: 1px solid var(--hp-border-light);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   padding: 0 20px;
 }
@@ -2149,21 +2241,21 @@ defineExpose({
   padding: 16px 24px;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #606266;
+  color: var(--hp-text-regular);
   font-size: 14px;
   font-weight: 500;
   border-bottom: 2px solid transparent;
 }
 
 .tab-item:hover {
-  color: #409eff;
-  background-color: #f0f9ff;
+  color: var(--hp-primary);
+  background-color: var(--hp-primary-light);
 }
 
 .tab-item.active {
-  color: #409eff;
-  border-bottom-color: #409eff;
-  background-color: #ecf5ff;
+  color: var(--hp-primary);
+  border-bottom-color: var(--hp-primary);
+  background-color: var(--hp-primary-light);
 }
 
 .tab-icon {
@@ -2182,7 +2274,7 @@ defineExpose({
 }
 
 .tab-title {
-  color: #333;
+  color: var(--hp-text-primary);
   margin-bottom: 24px;
   font-size: 20px;
   font-weight: 600;
@@ -2193,7 +2285,7 @@ defineExpose({
 .published-section,
 .settings-section,
 .about-section {
-  background-color: white;
+  background-color: var(--hp-bg-surface);
   padding: 20px;
   margin-bottom: 20px;
   border-radius: 8px;
@@ -2203,7 +2295,7 @@ defineExpose({
 .publish-section h3,
 .published-section h3,
 .settings-section h3 {
-  color: #444;
+  color: var(--hp-text-primary);
   margin-bottom: 16px;
   font-size: 16px;
   font-weight: 600;
@@ -2230,7 +2322,7 @@ defineExpose({
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
-  background: #f1f2f3;
+  background: var(--hp-bg-surface-light);
   padding: 4px;
   border-radius: 8px;
   width: fit-content;
@@ -2246,13 +2338,13 @@ defineExpose({
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
-  color: #606266;
+  color: var(--hp-text-regular);
   transition: all 0.3s;
 }
 
 .view-btn.active {
-  background: white;
-  color: #409eff;
+  background: var(--hp-bg-surface);
+  color: var(--hp-primary);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -2285,7 +2377,7 @@ defineExpose({
 .posts-table table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background-color: var(--hp-bg-surface);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -2295,10 +2387,11 @@ defineExpose({
 .posts-table td {
   padding: 12px 16px;
   text-align: left;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--hp-border-light);
   vertical-align: middle;
   line-height: 1.5;
   box-sizing: border-box;
+  color: var(--hp-text-regular);
 }
 
 .posts-table tbody tr:last-child td {
@@ -2313,14 +2406,14 @@ defineExpose({
 }
 
 .posts-table th {
-  background-color: #fafafa;
+  background-color: var(--hp-bg-surface-light);
   font-weight: 600;
-  color: #303133;
+  color: var(--hp-text-primary);
   font-size: 14px;
 }
 
 .posts-table tbody tr:hover {
-  background-color: #f5f7fa;
+  background-color: var(--hp-bg-surface-light);
 }
 
 .post-title-cell {
@@ -2331,14 +2424,14 @@ defineExpose({
 }
 
 .post-title-link {
-  color: #409eff;
+  color: var(--hp-primary);
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
 .post-title-link:hover {
   text-decoration: underline;
-  color: #66b1ff;
+  color: var(--hp-primary-light);
 }
 
 .source-badge {
@@ -2349,15 +2442,15 @@ defineExpose({
 }
 
 .source-plugin {
-  background: #f0f9eb;
-  color: #67c23a;
-  border: 1px solid #e1f3d8;
+  background: var(--hp-success-light);
+  color: var(--hp-success);
+  border: 1px solid var(--hp-success-border);
 }
 
 .source-halo {
-  background: #f4f4f5;
-  color: #909399;
-  border: 1px solid #e9e9eb;
+  background: var(--hp-bg-surface-light);
+  color: var(--hp-text-secondary);
+  border: 1px solid var(--hp-border-light);
 }
 
 .action-buttons {
@@ -2380,9 +2473,9 @@ defineExpose({
 .filter-toolbar {
   margin-bottom: 20px;
   padding: 15px;
-  background: #f8f9fa;
+  background: var(--hp-bg-surface-light);
   border-radius: 8px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--hp-border-light);
 }
 
 .filter-row {
@@ -2400,7 +2493,7 @@ defineExpose({
 
 .filter-label {
   font-size: 12px;
-  color: #606266;
+  color: var(--hp-text-secondary);
   font-weight: 500;
 }
 
@@ -2409,39 +2502,39 @@ defineExpose({
   min-width: 200px;
   max-width: 300px;
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--hp-border);
   border-radius: 4px;
   font-size: 14px;
   transition: all 0.2s;
 }
 
 .search-input:focus {
-  border-color: #409eff;
+  border-color: var(--hp-primary);
   outline: none;
   box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
 }
 
 .filter-select {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--hp-border);
   border-radius: 4px;
   font-size: 14px;
-  background: white;
+  background: var(--hp-bg-surface);
   min-width: 120px;
 }
 
 .language-select {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--hp-border);
   border-radius: 4px;
   font-size: 14px;
-  background: white;
+  background: var(--hp-bg-surface);
   min-width: 150px;
   cursor: pointer;
 }
 
 .language-select:focus {
-  border-color: #409eff;
+  border-color: var(--hp-primary);
   outline: none;
 }
 
@@ -2451,7 +2544,7 @@ defineExpose({
 
 .setting-label {
   font-weight: 600;
-  color: #303133;
+  color: var(--hp-text-primary);
   display: block;
   margin-bottom: 4px;
 }
@@ -2462,18 +2555,18 @@ defineExpose({
   padding: 2px 8px;
   margin: 2px;
   font-size: 12px;
-  background: #e8f4ff;
-  color: #409eff;
+  background: var(--hp-primary-dim);
+  color: var(--hp-primary);
   border-radius: 10px;
 }
 
 .cat-badge {
-  background: #f0f9eb;
-  color: #67c23a;
+  background: var(--hp-success-dim);
+  color: var(--hp-success);
 }
 
 .no-data {
-  color: #ccc;
+  color: var(--hp-text-secondary);
 }
 
 /* 模态对话框样式 */
@@ -2483,7 +2576,7 @@ defineExpose({
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--hp-mask);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -2491,7 +2584,7 @@ defineExpose({
 }
 
 .modal-content {
-  background: white;
+  background: var(--hp-bg-surface);
   border-radius: 8px;
   width: 90%;
   max-width: 500px;
@@ -2505,7 +2598,8 @@ defineExpose({
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--hp-border);
+  color: var(--hp-text-primary);
 }
 
 .modal-header h3 {
@@ -2518,13 +2612,13 @@ defineExpose({
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #999;
+  color: var(--hp-text-secondary);
   padding: 0;
   line-height: 1;
 }
 
 .close-btn:hover {
-  color: #333;
+  color: var(--hp-text-primary);
 }
 
 .modal-body {
@@ -2537,8 +2631,8 @@ defineExpose({
 }
 
 .edit-warning {
-  background: #fff7e6;
-  border: 1px solid #ffc53d;
+  background: var(--hp-warning-dim);
+  border: 1px solid var(--hp-warning);
   border-radius: 6px;
   padding: 10px 12px;
   margin-bottom: 16px;
@@ -2546,7 +2640,7 @@ defineExpose({
   align-items: flex-start;
   gap: 8px;
   font-size: 13px;
-  color: #ad6800;
+  color: var(--hp-warning);
   line-height: 1.5;
 }
 
@@ -2561,7 +2655,7 @@ defineExpose({
 .edit-label {
   display: block;
   font-weight: 600;
-  color: #303133;
+  color: var(--hp-text-primary);
   margin-bottom: 8px;
   font-size: 14px;
 }
@@ -2569,7 +2663,7 @@ defineExpose({
 .edit-input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--hp-border);
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.2s;
@@ -2577,7 +2671,7 @@ defineExpose({
 }
 
 .edit-input:focus {
-  border-color: #409eff;
+  border-color: var(--hp-primary);
   outline: none;
 }
 
@@ -2586,7 +2680,7 @@ defineExpose({
   flex-wrap: wrap;
   gap: 8px;
   padding: 12px;
-  background: #f5f7fa;
+  background: var(--hp-bg-surface-light);
   border-radius: 6px;
   border: 1px solid #e4e7ed;
   min-height: 40px;
@@ -2594,34 +2688,34 @@ defineExpose({
 
 .taxonomy-edit-item {
   padding: 6px 14px;
-  background: white;
-  border: 1px solid #dcdfe6;
+  background: var(--hp-bg-surface);
+  border: 1px solid var(--hp-border);
   border-radius: 16px;
   cursor: pointer;
   font-size: 13px;
-  color: #606266;
+  color: var(--hp-text-regular);
   transition: all 0.2s;
 }
 
 .taxonomy-edit-item:hover {
-  border-color: #409eff;
-  color: #409eff;
+  border-color: var(--hp-primary);
+  color: var(--hp-primary);
 }
 
 .taxonomy-edit-item.selected {
-  background: #ecf5ff;
-  border-color: #409eff;
-  color: #409eff;
+  background: var(--hp-primary-dim);
+  border-color: var(--hp-primary);
+  color: var(--hp-primary);
 }
 
 .taxonomy-edit-item.tag-item.selected {
-  background: #f0f9eb;
-  border-color: #67c23a;
-  color: #67c23a;
+  background: var(--hp-success-dim);
+  border-color: var(--hp-success);
+  color: var(--hp-success);
 }
 
 .taxonomy-empty {
-  color: #909399;
+  color: var(--hp-text-secondary);
   font-size: 13px;
   width: 100%;
   text-align: center;
@@ -2630,7 +2724,7 @@ defineExpose({
 
 .modal-footer {
   padding: 16px 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--hp-border);
   display: flex;
   justify-content: flex-end;
   gap: 10px;
@@ -2641,7 +2735,7 @@ defineExpose({
   flex-wrap: wrap;
   gap: 10px;
   padding: 10px;
-  background: #f9f9f9;
+  background: var(--hp-bg-surface-light);
   border-radius: 4px;
   max-height: 150px;
   overflow-y: auto;
@@ -2663,15 +2757,15 @@ defineExpose({
 .setting-item {
   margin-bottom: 20px;
   padding: 16px;
-  background-color: #fafafa;
+  background-color: var(--hp-bg-surface-light);
   border-radius: 6px;
-  border: 1px solid #eaeaea;
+  border: 1px solid var(--hp-border);
   transition: all 0.3s ease;
 }
 
 .setting-item:hover {
-  background-color: #f0f9ff;
-  border-color: #91d5ff;
+  background-color: var(--hp-primary-light);
+  border-color: var(--hp-primary);
 }
 
 .setting-info {
@@ -2680,7 +2774,7 @@ defineExpose({
 
 .setting-description {
   font-size: 13px;
-  color: #909394;
+  color: var(--hp-text-secondary);
   margin-top: 6px;
   line-height: 1.5;
 }
@@ -2694,7 +2788,7 @@ defineExpose({
 /* 帮助文本样式 */
 .help-text {
   font-size: 13px;
-  color: #909394;
+  color: var(--hp-text-secondary);
   margin-top: 6px;
   line-height: 1.5;
 }
@@ -2706,28 +2800,28 @@ defineExpose({
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid var(--hp-border);
 }
 
 .about-header h3 {
   margin: 0;
   font-size: 18px;
-  color: #333;
+  color: var(--hp-text-primary);
 }
 
 .version {
-  color: #909394;
+  color: var(--hp-text-secondary);
   font-size: 14px;
 }
 
 .about-content {
   line-height: 1.6;
-  color: #606266;
+  color: var(--hp-text-regular);
 }
 
 .about-content h4 {
   margin: 20px 0 12px 0;
-  color: #333;
+  color: var(--hp-text-primary);
   font-size: 16px;
 }
 
@@ -2750,7 +2844,7 @@ defineExpose({
   top: 6px;
   width: 16px;
   height: 16px;
-  background-color: #ecf5ff;
+  background-color: var(--hp-primary-light);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -2764,7 +2858,7 @@ defineExpose({
 }
 
 .author-info a {
-  color: #409eff;
+  color: var(--hp-primary);
   text-decoration: none;
 }
 
@@ -2781,7 +2875,7 @@ defineExpose({
   display: block;
   margin-bottom: 5px;
   font-weight: 500;
-  color: #555;
+  color: var(--hp-text-regular);
 }
 
 /* 内容区域标题和切换按钮 */
@@ -2800,22 +2894,22 @@ defineExpose({
 .tab-btn {
   padding: 4px 12px;
   font-size: 12px;
-  border: 1px solid #ddd;
-  background: #f5f5f5;
-  color: #666;
+  border: 1px solid var(--hp-border);
+  background: var(--hp-bg-surface-light);
+  color: var(--hp-text-regular);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .tab-btn:hover {
-  background: #e8e8e8;
+  background: var(--hp-bg-surface-light);
 }
 
 .tab-btn.active {
-  background: #409eff;
-  color: white;
-  border-color: #409eff;
+  background: var(--hp-primary);
+  color: var(--hp-bg-surface);
+  border-color: var(--hp-primary);
 }
 
 /* 内容预览区域 */
@@ -2824,9 +2918,9 @@ defineExpose({
   max-height: 400px;
   overflow-y: auto;
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--hp-border);
   border-radius: 4px;
-  background: #fafafa;
+  background: var(--hp-bg-surface-light);
   line-height: 1.6;
 }
 
@@ -2834,7 +2928,7 @@ defineExpose({
 .content-preview h2,
 .content-preview h3 {
   margin: 16px 0 8px 0;
-  color: #333;
+  color: var(--hp-text-primary);
 }
 
 .content-preview h1 { font-size: 1.5em; }
@@ -2844,15 +2938,15 @@ defineExpose({
 .content-preview p { margin: 8px 0; }
 
 .content-preview code {
-  background: #f0f0f0;
+  background: var(--hp-bg-surface);
   padding: 2px 6px;
   border-radius: 3px;
   font-family: monospace;
 }
 
 .content-preview pre {
-  background: #2d2d2d;
-  color: #f8f8f2;
+  background: var(--hp-text-primary); /* Dark background for code block? Original used #2d2d2d. hp-text-primary is #333. Close enough */
+  color: var(--hp-bg-surface); /* White text */
   padding: 12px;
   border-radius: 6px;
   overflow-x: auto;
@@ -2864,7 +2958,7 @@ defineExpose({
 }
 
 .content-preview a {
-  color: #409eff;
+  color: var(--hp-primary);
 }
 
 .content-preview img {
@@ -2882,30 +2976,32 @@ defineExpose({
 .form-group select {
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--hp-border);
   border-radius: 4px;
   font-size: 14px;
   box-sizing: border-box;
   transition: all 0.3s ease;
+  background-color: var(--hp-bg-surface);
+  color: var(--hp-text-primary);
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #409eff;
+  border-color: var(--hp-primary);
   box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
 }
 
 /* 错误和警告消息 */
 .error-message {
-  color: #f56c6c;
+  color: var(--hp-error);
   margin-top: 10px;
   font-size: 14px;
 }
 
 .warning-message {
-  color: #e6a23c;
+  color: var(--hp-warning);
   margin-top: 5px;
   font-size: 12px;
 }
@@ -2936,13 +3032,13 @@ defineExpose({
 
 .progress-step {
   font-size: 14px;
-  color: #333;
+  color: var(--hp-text-primary);
   font-weight: 500;
 }
 
 .progress-percent {
   font-size: 14px;
-  color: #409eff;
+  color: var(--hp-primary);
   font-weight: 600;
 }
 
@@ -2955,7 +3051,7 @@ defineExpose({
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #409eff 0%, #66b1ff 100%);
+  background: linear-gradient(90deg, var(--hp-primary) 0%, var(--hp-primary-light) 100%);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -3000,7 +3096,7 @@ defineExpose({
 
 .btn-link {
   background-color: transparent;
-  color: #409eff;
+  color: var(--hp-primary);
 }
 
 .btn-link:hover {
@@ -3010,7 +3106,7 @@ defineExpose({
 .btn-small {
   padding: 4px 8px;
   font-size: 12px;
-  background-color: #409eff;
+  background-color: var(--hp-primary);
   color: white;
   line-height: normal; /* 防止按钮行高影响 */
   min-height: 24px;    /* 确保按钮高度一致 */
@@ -3020,20 +3116,20 @@ defineExpose({
 }
 
 .btn-small:hover {
-  background-color: #66b1ff;
+  opacity: 0.9;
 }
 
 .btn-small.btn-danger {
-  background-color: #f56c6c;
+  background-color: var(--hp-error);
 }
 
 .btn-small.btn-danger:hover {
-  background-color: #f78989;
+  opacity: 0.9;
 }
 
 /* 独立的危险按钮样式 */
 .btn-danger {
-  background-color: #f56c6c;
+  background-color: var(--hp-error);
   color: white;
   border: none;
   padding: 8px 16px;
@@ -3044,25 +3140,25 @@ defineExpose({
 }
 
 .btn-danger:hover {
-  background-color: #f78989;
+  opacity: 0.9;
 }
 
 /* 危险区域样式 */
 .danger-zone {
-  border: 1px solid #ffcdd2;
+  border: 1px solid var(--hp-error);
   border-radius: 8px;
   padding: 16px;
-  background-color: #fff5f5;
+  background-color: var(--hp-error-dim);
   margin-top: 16px;
 }
 
 .danger-zone .danger-label {
-  color: #d32f2f;
+  color: var(--hp-error);
   font-weight: 600;
 }
 
 .section-description {
-  color: #666;
+  color: var(--hp-text-secondary);
   font-size: 13px;
   margin-bottom: 16px;
 }
@@ -3074,7 +3170,7 @@ defineExpose({
   gap: 5px;
   font-size: 14px;
   cursor: pointer;
-  color: #555;
+  color: var(--hp-text-regular);
   user-select: none;
 }
 
@@ -3090,9 +3186,9 @@ defineExpose({
   align-items: center;
   gap: 32px;
   padding: 14px 20px;
-  background-color: #f8f9fa;
+  background-color: var(--hp-bg-surface-light);
   border-radius: 8px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--hp-border);
 }
 
 .option-item {
@@ -3100,7 +3196,7 @@ defineExpose({
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: #495057;
+  color: var(--hp-text-secondary);
 }
 
 .option-item input[type="checkbox"] {
@@ -3108,7 +3204,7 @@ defineExpose({
   height: 16px;
   margin: 0;
   cursor: pointer;
-  accent-color: #409eff;
+  accent-color: var(--hp-primary);
 }
 
 .option-item label {
@@ -3120,15 +3216,15 @@ defineExpose({
 .option-item select {
   padding: 6px 12px;
   font-size: 14px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--hp-border);
   border-radius: 4px;
-  background-color: white;
+  background-color: var(--hp-bg-surface);
   cursor: pointer;
   min-width: 80px;
 }
 
 .option-item select:focus {
-  border-color: #409eff;
+  border-color: var(--hp-primary);
   outline: none;
 }
 
@@ -3139,9 +3235,9 @@ defineExpose({
   gap: 20px;
   flex-wrap: wrap;
   padding: 10px 12px;
-  background-color: #f8f9fa;
+  background-color: var(--hp-bg-surface-light);
   border-radius: 6px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--hp-border);
 }
 
 .visibility-inline {
@@ -3149,15 +3245,15 @@ defineExpose({
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  color: #555;
+  color: var(--hp-text-secondary);
 }
 
 .visibility-dropdown-small {
   padding: 4px 8px;
   font-size: 13px;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--hp-border);
   border-radius: 4px;
-  background-color: white;
+  background-color: var(--hp-bg-surface);
 }
 
 /* 单选按钮组样式 */
@@ -3196,9 +3292,9 @@ defineExpose({
   flex-direction: column;
   gap: 8px;
   padding: 10px;
-  background-color: #f9f9f9;
+  background-color: var(--hp-bg-surface-light);
   border-radius: 6px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--hp-border);
 }
 
 .slug-mode-item {
@@ -3209,17 +3305,17 @@ defineExpose({
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
-  background-color: white;
+  background-color: var(--hp-bg-surface);
   border: 1px solid transparent;
 }
 
 .slug-mode-item:hover {
-  background-color: #f0f7ff;
+  background-color: var(--hp-primary-light);
 }
 
 .slug-mode-item.active {
-  background-color: #e6f4ff;
-  border-color: #409eff;
+  background-color: var(--hp-primary-light);
+  border-color: var(--hp-primary);
 }
 
 .slug-mode-item input[type="radio"] {
@@ -3227,18 +3323,18 @@ defineExpose({
   height: 16px;
   margin: 0;
   cursor: pointer;
-  accent-color: #409eff;
+  accent-color: var(--hp-primary);
 }
 
 .slug-mode-item .mode-text {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--hp-text-primary);
 }
 
 .slug-mode-item .mode-hint {
   font-size: 12px;
-  color: #888;
+  color: var(--hp-text-secondary);
 }
 
 .slug-extra-option {
@@ -3259,17 +3355,17 @@ defineExpose({
   max-height: 150px;
   overflow-y: auto;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--hp-border);
   border-radius: 4px;
-  background-color: #fafafa;
+  background-color: var(--hp-bg-surface-light);
   min-height: 50px;
 }
 
 .taxonomy-item {
   padding: 6px 12px;
-  background-color: #e6f7ff;
-  color: #1890ff;
-  border: 1px solid #91d5ff;
+  background-color: var(--hp-primary-light);
+  color: var(--hp-primary);
+  border: 1px solid var(--hp-primary);
   border-radius: 16px;
   font-size: 14px;
   cursor: pointer;
@@ -3277,14 +3373,14 @@ defineExpose({
 }
 
 .taxonomy-item:hover {
-  background-color: #bae7ff;
-  border-color: #69c0ff;
+  background-color: var(--hp-primary-light);
+  border-color: var(--hp-primary);
 }
 
 .taxonomy-item.selected {
-  background-color: #1890ff;
-  color: white;
-  border-color: #1890ff;
+  background-color: var(--hp-primary);
+  color: var(--hp-bg-surface);
+  border-color: var(--hp-primary);
 }
 
 .new-taxonomy {
@@ -3302,17 +3398,17 @@ defineExpose({
 .empty-state {
   text-align: center;
   padding: 40px 20px;
-  color: #999;
+  color: var(--hp-text-secondary);
   font-style: italic;
-  background-color: #fafafa;
+  background-color: var(--hp-bg-surface-light);
   border-radius: 6px;
-  border: 1px dashed #eaeaea;
+  border: 1px dashed var(--hp-border);
 }
 
 /* 文章状态标签 */
 .post-status {
-  background-color: #e6f7ff;
-  color: #1890ff;
+  background-color: var(--hp-primary-light);
+  color: var(--hp-primary);
   padding: 2px 8px;
   border-radius: 10px;
   font-size: 12px;
@@ -3336,15 +3432,15 @@ defineExpose({
 }
 
 .message.success {
-  background-color: #67c23a;
+  background-color: var(--hp-success);
 }
 
 .message.error {
-  background-color: #f56c6c;
+  background-color: var(--hp-error);
 }
 
 .message.info {
-  background-color: #909399;
+  background-color: var(--hp-text-secondary);
 }
 
 .close-btn {
@@ -3371,13 +3467,13 @@ defineExpose({
   padding: 12px 16px;
   border-radius: 6px;
   margin-bottom: 16px;
-  background-color: #fff3cd;
-  border: 1px solid #ffc107;
+  background-color: var(--hp-warning-dim);
+  border: 1px solid var(--hp-warning);
 }
 
 .login-status.logged-in {
-  background-color: #d4edda;
-  border-color: #28a745;
+  background-color: var(--hp-success-dim);
+  border-color: var(--hp-success);
 }
 
 .login-status .status-icon {
@@ -3386,42 +3482,42 @@ defineExpose({
 
 .login-status .status-text {
   font-size: 14px;
-  color: #333;
+  color: var(--hp-text-primary);
 }
 
 /* 登录表单样式 */
 .login-form {
   margin-top: 20px;
   padding: 16px;
-  background-color: #fafafa;
+  background-color: var(--hp-bg-surface-light);
   border-radius: 6px;
-  border: 1px solid #eaeaea;
+  border: 1px solid var(--hp-border);
 }
 
 .login-form h4 {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #333;
+  color: var(--hp-text-primary);
 }
 
 /* 手动 Cookie 配置折叠区域 */
 .manual-cookie-section {
   margin-top: 20px;
   padding: 12px 16px;
-  background-color: #f5f5f5;
+  background-color: var(--hp-bg-base);
   border-radius: 6px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--hp-border);
 }
 
 .manual-cookie-section summary {
   cursor: pointer;
   font-size: 14px;
-  color: #666;
+  color: var(--hp-text-regular);
   user-select: none;
 }
 
 .manual-cookie-section summary:hover {
-  color: #409eff;
+  color: var(--hp-primary);
 }
 
 .manual-cookie-section[open] > summary {
@@ -3434,8 +3530,8 @@ defineExpose({
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  background-color: #fff3cd;
-  border: 1px solid #ffc107;
+  background-color: var(--hp-warning-dim);
+  border: 1px solid var(--hp-warning);
   border-radius: 6px;
   margin-bottom: 20px;
 }
@@ -3446,16 +3542,16 @@ defineExpose({
 
 .config-warning span {
   font-size: 14px;
-  color: #856404;
+  color: var(--hp-warning);
 }
 
 /* iframe 登录框样式 */
 .login-iframe-container {
   margin-top: 20px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--hp-border);
   border-radius: 8px;
   overflow: hidden;
-  background-color: white;
+  background-color: var(--hp-bg-surface);
 }
 
 .login-iframe-header {
@@ -3463,27 +3559,27 @@ defineExpose({
   justify-content: space-between;
   align-items: center;
   padding: 10px 16px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #ddd;
+  background-color: var(--hp-bg-surface-light);
+  border-bottom: 1px solid var(--hp-border);
 }
 
 .login-iframe-header span {
   font-size: 13px;
-  color: #666;
+  color: var(--hp-text-regular);
 }
 
 .login-iframe-header .close-btn {
   background: none;
   border: none;
   font-size: 20px;
-  color: #999;
+  color: var(--hp-text-secondary);
   cursor: pointer;
   padding: 0;
   line-height: 1;
 }
 
 .login-iframe-header .close-btn:hover {
-  color: #333;
+  color: var(--hp-text-primary);
 }
 
 .login-iframe {
@@ -3497,7 +3593,7 @@ defineExpose({
 .btn-link {
   background: none;
   border: none;
-  color: #409eff;
+  color: var(--hp-primary);
   cursor: pointer;
   font-size: 14px;
   padding: 0;
@@ -3505,7 +3601,8 @@ defineExpose({
 }
 
 .btn-link:hover {
-  color: #66b1ff;
+  color: var(--hp-primary);
+  opacity: 0.8;
 }
 
 /* 授权状态卡片样式 */
@@ -3516,23 +3613,23 @@ defineExpose({
   padding: 16px 20px;
   border-radius: 8px;
   margin-bottom: 20px;
-  border: 1px solid #e0e0e0;
-  background-color: #f9f9f9;
+  border: 1px solid var(--hp-border);
+  background-color: var(--hp-bg-surface-light);
 }
 
 .auth-status-card.auth-valid {
-  background-color: #e8f5e9;
-  border-color: #4caf50;
+  background-color: var(--hp-success-light);
+  border-color: var(--hp-success);
 }
 
 .auth-status-card.auth-invalid {
-  background-color: #ffebee;
-  border-color: #f44336;
+  background-color: var(--hp-error-dim);
+  border-color: var(--hp-error);
 }
 
 .auth-status-card.auth-unknown {
-  background-color: #fff8e1;
-  border-color: #ff9800;
+  background-color: var(--hp-warning-dim);
+  border-color: var(--hp-warning);
 }
 
 .auth-status-icon {
@@ -3547,13 +3644,13 @@ defineExpose({
 .auth-status-title {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--hp-text-primary);
   margin-bottom: 4px;
 }
 
 .auth-status-desc {
   font-size: 13px;
-  color: #666;
+  color: var(--hp-text-regular);
 }
 
 .auth-status-actions {
@@ -3566,14 +3663,14 @@ defineExpose({
   font-size: 12px;
   border-radius: 4px;
   border: none;
-  background-color: #409eff;
+  background-color: var(--hp-primary);
   color: white;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-small:hover:not(:disabled) {
-  background-color: #66b1ff;
+  opacity: 0.9; /* Simulating lighter hover */
 }
 
 .btn-small:disabled {
@@ -3582,38 +3679,37 @@ defineExpose({
 }
 
 .btn-small.btn-danger {
-  background-color: #f56c6c;
+  background-color: var(--hp-error);
   color: white;
 }
 
 .btn-small.btn-danger:hover:not(:disabled) {
-  background-color: #f78989;
+  opacity: 0.9;
 }
 
 .btn-primary-small {
-  background-color: #409eff;
-  border-color: #409eff;
+  background-color: var(--hp-primary);
+  border-color: var(--hp-primary);
   color: white;
 }
 
 .btn-primary-small:hover:not(:disabled) {
-  background-color: #66b1ff;
-  border-color: #66b1ff;
+  opacity: 0.9;
 }
 
 /* 登录说明样式 */
 .login-instructions {
   margin-top: 20px;
   padding: 16px;
-  background-color: #fafafa;
+  background-color: var(--hp-bg-surface-light);
   border-radius: 6px;
-  border: 1px solid #eaeaea;
+  border: 1px solid var(--hp-border);
 }
 
 .login-instructions h4 {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #333;
+  color: var(--hp-text-primary);
 }
 
 .login-instructions ol {
@@ -3623,7 +3719,7 @@ defineExpose({
 
 .login-instructions li {
   font-size: 13px;
-  color: #666;
+  color: var(--hp-text-regular);
   margin-bottom: 6px;
 }
 
@@ -3635,7 +3731,7 @@ defineExpose({
 .cookie-config-section textarea {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--hp-border);
   border-radius: 4px;
   font-size: 14px;
   font-family: monospace;
@@ -3644,22 +3740,22 @@ defineExpose({
 }
 
 .cookie-config-section textarea:focus {
-  border-color: #409eff;
+  border-color: var(--hp-primary);
   outline: none;
 }
 
 .cookie-help {
   margin-top: 16px;
   padding: 16px;
-  background-color: #f0f9ff;
-  border: 1px solid #b3d8ff;
+  background-color: var(--hp-primary-light);
+  border: 1px solid var(--hp-primary-dim); /* Was primary border or dim? Original: #b3d8ff. hp-primary-dim is rgba. Let's use hp-primary with opacity or just dimmer. */
   border-radius: 6px;
 }
 
 .cookie-help h4 {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #409eff;
+  color: var(--hp-primary);
 }
 
 .cookie-help ol {
@@ -3669,38 +3765,38 @@ defineExpose({
 
 .cookie-help li {
   font-size: 13px;
-  color: #606266;
+  color: var(--hp-text-regular);
   margin-bottom: 8px;
   line-height: 1.6;
 }
 
 .cookie-help kbd {
-  background-color: #ebeef5;
+  background-color: var(--hp-bg-surface-light);
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 12px;
   font-family: monospace;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--hp-border);
 }
 
 .cookie-help code {
-  background-color: #f5f7fa;
+  background-color: var(--hp-bg-surface-light);
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 12px;
   font-family: monospace;
-  color: #e6a23c;
+  color: var(--hp-warning);
 }
 
 /* 必填标记 */
 .required {
-  color: #f56c6c;
+  color: var(--hp-error);
 }
 
 /* 修复按钮样式 - 确保文字可见 */
 .btn-primary {
-  background-color: #409eff;
-  border: 1px solid #409eff;
+  background-color: var(--hp-primary);
+  border: 1px solid var(--hp-primary);
   color: #ffffff !important;
   padding: 10px 20px;
   border-radius: 4px;
@@ -3710,19 +3806,17 @@ defineExpose({
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #66b1ff;
-  border-color: #66b1ff;
+  opacity: 0.9;
 }
 
 .btn-primary:disabled {
-  background-color: #a0cfff;
-  border-color: #a0cfff;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .btn-secondary {
-  background-color: #909399;
-  border: 1px solid #909399;
+  background-color: var(--hp-text-secondary); /* Original was #909399 */
+  border: 1px solid var(--hp-text-secondary);
   color: #ffffff !important;
   padding: 10px 20px;
   border-radius: 4px;
@@ -3732,20 +3826,18 @@ defineExpose({
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #a6a9ad;
-  border-color: #a6a9ad;
+  opacity: 0.9;
 }
 
 .btn-secondary:disabled {
-  background-color: #c8c9cc;
-  border-color: #c8c9cc;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .btn-outline {
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  color: #606266 !important;
+  background-color: var(--hp-bg-surface);
+  border: 1px solid var(--hp-border);
+  color: var(--hp-text-regular) !important;
   padding: 10px 20px;
   border-radius: 4px;
   font-size: 14px;
@@ -3754,21 +3846,21 @@ defineExpose({
 }
 
 .btn-outline:hover:not(:disabled) {
-  color: #409eff !important;
-  border-color: #c6e2ff;
-  background-color: #ecf5ff;
+  color: var(--hp-primary) !important;
+  border-color: var(--hp-primary-light);
+  background-color: var(--hp-primary-light);
 }
 
 .btn-outline:disabled {
-  color: #c0c4cc !important;
-  background-color: #f5f7fa;
+  color: var(--hp-text-secondary) !important;
+  background-color: var(--hp-bg-surface-light);
   cursor: not-allowed;
 }
 
 .btn-text {
   background: none;
   border: none;
-  color: #409eff;
+  color: var(--hp-primary);
   cursor: pointer;
   font-size: inherit;
   padding: 0;
@@ -3780,14 +3872,15 @@ defineExpose({
 }
 
 .btn-text:disabled {
-  color: #c0c4cc;
+  color: var(--hp-text-secondary);
   cursor: not-allowed;
 }
 
 /* 自动登录区域 */
 .auto-login-section {
   padding: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--hp-primary) 0%, #764ba2 100%); /* Adjusted to use var for start, though gradient is tricky. Let's make it simpler or use vars if possible. Actually, simpler is better for dark mode. */
+  background-color: var(--hp-primary); /* Fallback */
   border-radius: 8px;
   color: white;
   margin-bottom: 16px;
@@ -3808,7 +3901,7 @@ defineExpose({
 
 .auto-login-section .btn-primary {
   background-color: white;
-  color: #667eea !important;
+  color: var(--hp-primary) !important;
   border-color: white;
 }
 
@@ -3827,12 +3920,12 @@ defineExpose({
 .divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid #dcdfe6;
+  border-bottom: 1px solid var(--hp-border);
 }
 
 .divider span {
   padding: 0 16px;
-  color: #909399;
+  color: var(--hp-text-secondary);
   font-size: 13px;
 }
 
@@ -3840,20 +3933,20 @@ defineExpose({
 .cookie-help-details {
   margin-top: 16px;
   padding: 12px 16px;
-  background-color: #f5f7fa;
+  background-color: var(--hp-bg-surface-light);
   border-radius: 6px;
-  border: 1px solid #e4e7ed;
+  border: 1px solid var(--hp-border);
 }
 
 .cookie-help-details summary {
   cursor: pointer;
   font-size: 14px;
-  color: #606266;
+  color: var(--hp-text-regular);
   user-select: none;
 }
 
 .cookie-help-details summary:hover {
-  color: #409eff;
+  color: var(--hp-primary);
 }
 
 .cookie-help-details[open] > summary {
@@ -3867,27 +3960,27 @@ defineExpose({
 
 .cookie-help-details li {
   font-size: 13px;
-  color: #606266;
+  color: var(--hp-text-regular);
   margin-bottom: 8px;
   line-height: 1.6;
 }
 
 .cookie-help-details kbd {
-  background-color: #ebeef5;
+  background-color: var(--hp-bg-surface-light);
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 12px;
   font-family: monospace;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--hp-border);
 }
 
 .cookie-help-details code {
-  background-color: #fff;
+  background-color: var(--hp-bg-surface);
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 12px;
   font-family: monospace;
-  color: #e6a23c;
+  color: var(--hp-warning);
 }
 
 /* 修复 taxonomy 样式问题 */
@@ -3904,12 +3997,12 @@ defineExpose({
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   font-size: 13px;
-  color: var(--b3-theme-on-surface);
-  background-color: var(--b3-theme-surface);
+  color: var(--hp-text-primary);
+  background-color: var(--hp-bg-surface);
 }
 
 .new-taxonomy input:focus {
-  border-color: var(--b3-theme-primary);
+  border-color: var(--hp-primary);
   outline: none;
 }
 
@@ -3920,8 +4013,8 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--b3-theme-primary);
-  color: #fff;
+  background-color: var(--hp-primary);
+  color: var(--hp-text-on-primary, white);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -3933,12 +4026,12 @@ defineExpose({
 }
 
 .taxonomy-item {
-  color: var(--b3-theme-on-surface); /* 确保文字可见 */
-}
-
-.taxonomy-item.selected {
-  background-color: var(--b3-theme-primary-light);
-  color: var(--b3-theme-primary);
-  border-color: var(--b3-theme-primary);
+  color: var(--hp-text-primary); /* 确保文字可见 */
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 10px 14px;
+  background-color: var(--hp-primary-light);
+  color: var(--hp-primary);
+  border: 1px solid var(--hp-primary);
 }
 </style>
