@@ -2,7 +2,7 @@
   "name": "siyuan-plugin-halo-publisher",
   "author": "Sundaydream",
   "url": "https://github.com/Sundaydream/siyuan-plugin-halo-publisher",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "minAppVersion": "3.5.2",
   "disabledInPublish": true,
   "backends": [

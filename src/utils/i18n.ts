@@ -137,6 +137,9 @@ const translations: Record<Language, Record<string, string>> = {
         'management.filterAll': '全部',
         'management.filterSynced': '已同步',
         'management.filterModified': '已修改',
+        'management.editTip': '此文章由插件发布。文章标题建议在思源笔记中修改后使用同步功能更新，其余参数如别名、分类、标签、发布选项等可以直接在这里修改。',
+        'management.deleteRecordConfirm': '确定要删除这条发布记录吗？\n注意：这不会删除 Halo 上的文章（如果还存在的话），仅删除本地的同步记录。',
+        'management.deleteArticleConfirm': '确定要删除这篇文章吗？此操作将把文章移入回收站。',
 
         // 通用设置页
         'settings.title': '通用设置',
@@ -382,6 +385,9 @@ const translations: Record<Language, Record<string, string>> = {
         'management.filterAll': '全部',
         'management.filterSynced': '已同步',
         'management.filterModified': '已修改',
+        'management.editTip': '此文章由插件發佈。文章標題建議在思源筆記中修改後使用同步功能更新，其餘參數如別名、分類、標籤、發佈選項等可以直接在這裡修改。',
+        'management.deleteRecordConfirm': '確定要刪除這條發佈記錄嗎？\n注意：這不會刪除 Halo 上的文章（如果還存在的話），僅刪除本地的同步記錄。',
+        'management.deleteArticleConfirm': '確定要刪除這篇文章嗎？此操作將把文章移入回收站。',
 
         // 通用設定頁
         'settings.title': '通用設定',
@@ -627,6 +633,9 @@ const translations: Record<Language, Record<string, string>> = {
         'management.filterAll': 'All',
         'management.filterSynced': 'Synced',
         'management.filterModified': 'Modified',
+        'management.editTip': 'This article was published by the plugin. It is recommended to modify the title in SiYuan Note and use the sync function. Other parameters like slug, categories, tags, and publish options can be modified here directly.',
+        'management.deleteRecordConfirm': 'Are you sure you want to delete this publish record?\nNote: This will NOT delete the article on Halo (if it exists), only the local sync record.',
+        'management.deleteArticleConfirm': 'Are you sure you want to delete this article? This action will move the article to the trash.',
 
         // Settings page
         'settings.title': 'General Settings',

@@ -429,7 +429,9 @@
           <div class="modal-body">
             <div class="edit-warning" v-if="PublishStore.isPluginPublished(editingPostId)">
               <span class="warning-icon">⚠️</span>
-              <span>此文章由插件发布。文章标题建议在思源笔记中修改后使用同步功能更新，其余参数如别名、分类、标签、发布选项等可以直接在这里修改。</span>
+            <div class="edit-tip">
+              <span>{{ t('management.editTip') }}</span>
+            </div>
             </div>
             <div class="edit-form-group">
               <label class="edit-label">{{ t('management.articleTitle') }}</label>
@@ -2052,7 +2054,7 @@ const updateToHalo = async (noteItem: SiyuanNoteItem) => {
 
 // 删除文章
 const deletePost = async (postId: string) => {
-  if (!confirm('确定要删除这篇文章吗？此操作将把文章移入回收站。')) {
+  if (!confirm(t('management.deleteArticleConfirm'))) {
     return;
   }
   
@@ -2078,7 +2080,7 @@ const deletePost = async (postId: string) => {
 
 // 移除关联记录（不删除 Halo 文章）
 const removeAssociation = async (noteItem: SiyuanNoteItem) => {
-  if (!confirm('确定要删除这条发布记录吗？\n注意：这不会删除 Halo 上的文章（如果还存在的话），仅删除本地的同步记录。')) {
+  if (!confirm(t('management.deleteRecordConfirm'))) {
     return;
   }
 
