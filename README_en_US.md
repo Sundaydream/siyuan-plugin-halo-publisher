@@ -16,6 +16,19 @@ If you encounter any issues during use, feedback is welcome, but there is no gua
 
 This plugin is unlikely to support any other blog platforms besides Halo in the future. Those with such needs please choose other plugins.
 
+**View Releases and Changelogs on GitHub:**
+
+https://github.com/Sundaydream/siyuan-plugin-halo-publisher/releases
+
+**Donation Links:**
+
+- Mainland China users: https://afdian.com/a/sundaydream
+- Other regions: https://buymeacoffee.com/sundaydream
+
+**My Personal Site:**
+
+https://www.sundaydream.top
+
 ---
 
 ## 📖 Introduction
@@ -92,7 +105,8 @@ Click the **Publish to Halo** button.
 In the **Article Management** tab, you can view all associated articles:
 - **♻️ Update**: After modifying the note locally, click update to sync changes to Halo.
 - **🔗 View**: Directly open the browser to visit the blog article.
-- **🗑️ Delete**
+- **🗑️ Delete**: Delete article or article upload record.
+- **✍️ Edit**: Modify article slug, category, visibility, etc.
 
 ### 4. Data Backup & Migration
 

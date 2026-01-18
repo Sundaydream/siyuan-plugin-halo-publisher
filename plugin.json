@@ -27,7 +27,9 @@
     "zh_CHT": "README_zh_CHT.md"
   },
   "funding": {
-    "custom": []
+    "custom": [
+      "https://afdian.com/a/sundaydream"
+    ]
   },
   "keywords": [
     "halo",

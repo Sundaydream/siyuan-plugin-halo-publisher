@@ -16,6 +16,19 @@
 
 本插件不出意外的話在未來不會支持除 Halo 外的任何其他部落格平台，有相關需求者請選用其他插件。
 
+**在 GitHub 查看發佈與更新日誌：**
+
+https://github.com/Sundaydream/siyuan-plugin-halo-publisher/releases
+
+**打賞鏈接：**
+
+- 中國大陸用戶：https://afdian.com/a/sundaydream
+- 其他地區用戶：https://buymeacoffee.com/sundaydream
+
+**我的個人站：**
+
+https://www.sundaydream.top
+
 ---
 
 ## 📖 簡介
@@ -92,7 +105,8 @@
 在 **文章管理** 標籤頁，您可以查看所有已建立關聯的文章：
 - **♻️ 更新**：本地修改筆記後，點擊更新可將變動同步至 Halo。
 - **🔗 查看**：直接打開瀏覽器訪問部落格文章。
-- **🗑️ 刪除**
+- **🗑️ 刪除**：刪除文章或文章上傳記錄。
+- **✍️ 編輯**：修改文章別名、分類、可見性等參數。
 
 ### 4. 數據備份與遷移
 

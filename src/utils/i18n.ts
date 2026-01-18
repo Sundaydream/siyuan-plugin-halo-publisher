@@ -214,6 +214,10 @@ const translations: Record<Language, Record<string, string>> = {
         'about.licenseText': '本插件采用 MIT 协议开源免费，欢迎提交 Issue 和 Pull Request！',
         'about.disclaimer': '免责声明',
         'about.disclaimerText': '本插件由 AI 辅助开发，未经过完整测试。数据请自行备份，使用产生的一切后果自负。',
+        'about.donation': '打赏',
+        'about.donationDesc': '如果此插件对您有帮助，可以点击如下链接打赏，谢谢您！',
+        'about.afdian': '爱发电',
+        'about.buymeacoffee': 'Buy Me a Coffee',
 
         // 通用消息
         'msg.success': '成功',
@@ -455,6 +459,10 @@ const translations: Record<Language, Record<string, string>> = {
         'about.licenseText': '本插件採用 MIT 協議開源免費，歡迎提交 Issue 和 Pull Request！',
         'about.disclaimer': '免責聲明',
         'about.disclaimerText': '本插件由 AI 輔助開發，未經過完整測試。數據請自行備份，使用產生的一切後果自負。',
+        'about.donation': '贊助',
+        'about.donationDesc': '如果此插件對您有幫助，可以點擊如下鏈接贊助，謝謝您！',
+        'about.afdian': '愛發電',
+        'about.buymeacoffee': 'Buy Me a Coffee',
 
         // 通用訊息
         'msg.success': '成功',
@@ -696,6 +704,10 @@ const translations: Record<Language, Record<string, string>> = {
         'about.licenseText': 'This plugin is open source under MIT License. Issues and Pull Requests are welcome!',
         'about.disclaimer': 'Disclaimer',
         'about.disclaimerText': 'This plugin was developed with AI assistance and has not been fully tested. Please backup your data. Use at your own risk.',
+        'about.donation': 'Donation',
+        'about.donationDesc': 'If this plugin helps you, please consider donating via the link below. Thank you!',
+        'about.afdian': 'Afdian',
+        'about.buymeacoffee': 'Buy Me a Coffee',
 
         // Common messages
         'msg.success': 'Success',

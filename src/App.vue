@@ -750,6 +750,19 @@
 
           <h4>{{ t('about.disclaimer') }}</h4>
           <p>{{ t('about.disclaimerText') }}</p>
+
+          <h4>{{ t('about.donation') }}</h4>
+          <p>{{ t('about.donationDesc') }}</p>
+          <div class="donation-links">
+            <a href="https://afdian.com/a/sundaydream" target="_blank" class="donation-link">
+              <span class="donation-icon">⚡</span>
+              {{ t('about.afdian') }}
+            </a>
+            <a href="https://buymeacoffee.com/sundaydream" target="_blank" class="donation-link bmac">
+              <span class="donation-icon">☕</span>
+              {{ t('about.buymeacoffee') }}
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -2849,9 +2862,45 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  color: #409eff;
 }
+
+.donation-links {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.donation-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #946ce6; /* Afdian purple */
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+
+.donation-link:hover {
+  opacity: 0.9;
+  color: white;
+}
+
+.donation-link.bmac {
+  background-color: #FFDD00;
+  color: #000000;
+}
+
+.donation-link.bmac:hover {
+  color: #000000;
+}
+
+.donation-icon {
+  font-size: 16px;
+}
+
 
 .author-info p {
   margin: 8px 0;
@@ -3018,9 +3067,10 @@ defineExpose({
 .publish-progress {
   margin-top: 20px;
   padding: 15px;
-  background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%);
+  background: var(--hp-bg-surface-light);
   border-radius: 8px;
-  border: 1px solid #d0e5ff;
+  border: 1px solid var(--hp-border);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
 .progress-header {
@@ -3044,9 +3094,10 @@ defineExpose({
 
 .progress-bar {
   height: 8px;
-  background-color: #e0e0e0;
+  background-color: var(--hp-bg-surface-light);
   border-radius: 4px;
   overflow: hidden;
+  border: 1px solid var(--hp-border);
 }
 
 .progress-fill {
