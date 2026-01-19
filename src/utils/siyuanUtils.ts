@@ -67,16 +67,43 @@ export class SiyuanUtils {
 
         // 从文档属性（ial）中提取封面图
         const ial = docResult.data[0].ial || '';
-        const iconMatch = ial.match(/title-img="([^"]+)"/);
-        if (iconMatch && iconMatch[1]) {
-          let rawCover = iconMatch[1];
-          // 如果包含 url() 包装，提取其中的 URL
-          const urlMatch = rawCover.match(/url\((['"]?)(.*?)\1\)/);
-          if (urlMatch && urlMatch[2]) {
-            rawCover = urlMatch[2];
+
+        // 策略1: 优先匹配 url(...) 结构
+        // 使用 [^=]*? 防止跨越到其他属性（假设属性间有 = 分隔），解决 nested quotes 问题
+        const urlMatch = ial.match(/title-img=[^=]*?url\((['"]?)(.*?)\1\)/);
+
+        // 策略2: 标准属性匹配 (fallback)
+        // 匹配 title-img="xxx" 或 title-img=&quot;xxx&quot;
+        const simpleMatch = ial.match(/title-img=(["']|&quot;)(.*?)\1/);
+
+        let rawCover = '';
+        if (urlMatch && urlMatch[2]) {
+          rawCover = urlMatch[2];
+          console.log('[SiyuanUtils] Extracted cover via URL pattern:', rawCover);
+        } else if (simpleMatch && simpleMatch[2]) {
+          rawCover = simpleMatch[2];
+        }
+
+        if (rawCover) {
+          // 统一清理逻辑
+          // 1. 处理 HTML 转义
+          rawCover = rawCover.replace(/&quot;/g, '"')
+            .replace(/&apos;/g, "'")
+            .replace(/&amp;/g, '&');
+
+          // 2. 再次检查是否包含 url() (针对策略2提取出的完整 CSS 串)
+          const innerUrlMatch = rawCover.match(/url\((['"]?)(.*?)\1\)/);
+          if (innerUrlMatch && innerUrlMatch[2]) {
+            rawCover = innerUrlMatch[2];
           }
+
+          // 3. 去除首尾引号
+          rawCover = rawCover.replace(/^["']+|["']+$/g, '');
+
           coverImage = rawCover;
-          console.log('[SiyuanUtils] Found cover image from ial:', coverImage);
+          console.log('[SiyuanUtils] Final cover image:', coverImage);
+
+          // 从内容中移除封面图（思源导出时会将封面图放在正文开头）
 
           // 从内容中移除封面图（思源导出时会将封面图放在正文开头）
           // 匹配第一行的图片，如果文件名与封面图匹配则移除
