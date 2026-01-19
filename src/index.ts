@@ -318,7 +318,9 @@ export default class HaloPublisherPlugin extends Plugin {
   public async fetchPostBinary(url: string, options: {
     method: string;
     contentType: string;
-    cookie: string;
+    cookie?: string;
+    authType?: 'cookie' | 'pat';
+    personalAccessToken?: string;
     bodyBase64: string;
   }) {
     try {
@@ -326,9 +328,15 @@ export default class HaloPublisherPlugin extends Plugin {
 
       const headers: any[] = [
         { 'Content-Type': options.contentType },
-        { 'Cookie': options.cookie },
         { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) SiYuan/1.0 Chrome/100.0.0.0 Safari/537.36' }
       ];
+
+      // 根据认证类型添加对应的认证头
+      if (options.authType === 'pat' && options.personalAccessToken) {
+        headers.push({ 'Authorization': `Bearer ${options.personalAccessToken}` });
+      } else if (options.cookie) {
+        headers.push({ 'Cookie': options.cookie });
+      }
 
       const response = await fetchSyncPost('/api/network/forwardProxy', {
         url: url,

@@ -555,8 +555,23 @@
           >
         </div>
         
+        <!-- 认证方式切换 -->
+        <div class="auth-type-selector">
+          <label class="form-label">{{ t('settings.authType') }}</label>
+          <div class="auth-type-options">
+            <label class="radio-label" :class="{ active: configForm.authType === 'cookie' }">
+              <input type="radio" v-model="configForm.authType" value="cookie">
+              <span>{{ t('settings.authTypeCookie') }}</span>
+            </label>
+            <label class="radio-label" :class="{ active: configForm.authType === 'pat' }">
+              <input type="radio" v-model="configForm.authType" value="pat">
+              <span>{{ t('settings.authTypePat') }}</span>
+            </label>
+          </div>
+        </div>
+
         <!-- Cookie 配置（主要方式） -->
-        <div class="cookie-config-section">
+        <div v-if="configForm.authType === 'cookie'" class="cookie-config-section">
           <!-- 自动获取 Cookie 按钮 -->
           <div class="auto-login-section">
             <h4>{{ t('settings.autoLogin') }}</h4>
@@ -603,6 +618,31 @@
               {{ t('settings.saveAndVerify') }}
             </button>
             <button @click="saveConfig" class="btn-outline" :disabled="!configForm.url || !configForm.cookie">
+              {{ t('settings.saveOnly') }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 个人令牌配置 -->
+        <div v-else class="pat-config-section">
+          <div class="form-group">
+            <label for="pat">{{ t('settings.pat') }} <span class="required">*</span></label>
+            <input 
+              type="password" 
+              id="pat" 
+              v-model="configForm.personalAccessToken" 
+              :placeholder="t('settings.patPlaceholder')"
+            >
+            <p class="help-text pat-hint">
+              <span class="hint-icon">💡</span>
+              {{ t('settings.patHint') }}
+            </p>
+          </div>
+          <div class="button-group">
+            <button @click="saveAndVerifyPat" class="btn-primary" :disabled="!configForm.url || !configForm.personalAccessToken">
+              {{ t('settings.saveAndVerify') }}
+            </button>
+            <button @click="saveConfig" class="btn-outline" :disabled="!configForm.url || !configForm.personalAccessToken">
               {{ t('settings.saveOnly') }}
             </button>
           </div>
@@ -845,7 +885,9 @@ const tabs = computed(() => [
 // 配置表单
 const configForm = reactive({
   url: '',
-  cookie: ''
+  cookie: '',
+  authType: 'cookie' as 'cookie' | 'pat',
+  personalAccessToken: ''
 });
 
 
@@ -1004,8 +1046,21 @@ const publishStep = ref('');
 
 // 计算属性：配置是否有效
 const isConfigValid = computed(() => {
+  if (configForm.authType === 'pat') {
+    return !!configForm.url && !!configForm.personalAccessToken;
+  }
   return !!configForm.url && !!configForm.cookie;
 });
+
+// 辅助函数：获取当前完整的配置对象
+const getCurrentConfig = () => {
+  return useHalowebWeb({
+    url: configForm.url,
+    cookie: configForm.cookie,
+    authType: configForm.authType,
+    personalAccessToken: configForm.personalAccessToken
+  });
+};
 
 // 计算属性：文章表单是否有效
 const isPostFormValid = computed(() => {
@@ -1118,7 +1173,9 @@ const saveConfig = async () => {
   try {
     const config = useHalowebWeb({
       url: configForm.url,
-      cookie: configForm.cookie
+      cookie: configForm.cookie,
+      authType: configForm.authType,
+      personalAccessToken: configForm.personalAccessToken
     });
     
     // 使用插件 API 保存
@@ -1158,9 +1215,11 @@ onMounted(async () => {
     if (savedConfig) {
       configForm.url = savedConfig.url || '';
       configForm.cookie = savedConfig.cookie || '';
+      configForm.authType = savedConfig.authType || 'cookie';
+      configForm.personalAccessToken = savedConfig.personalAccessToken || '';
       
       // 自动检查授权
-      if (configForm.url && configForm.cookie) {
+      if (isConfigValid.value) {
         // 等待一下 UI 渲染
         setTimeout(() => {
           loadTaxonomies();
@@ -1207,12 +1266,12 @@ const switchTab = (tabId: string) => {
   activeTab.value = tabId;
   
   // 如果切换到文章发布或文章管理标签页，加载分类和标签
-  if ((tabId === 'articlePublish' || tabId === 'articleManagement') && configForm.url && configForm.cookie) {
+  if ((tabId === 'articlePublish' || tabId === 'articleManagement') && isConfigValid.value) {
     loadTaxonomies();
   }
   
   // 如果切换到文章管理标签页，自动加载文章列表
-  if (tabId === 'articleManagement' && configForm.url && configForm.cookie) {
+  if (tabId === 'articleManagement' && isConfigValid.value) {
     fetchPublishedPosts();
   }
 };
@@ -1226,7 +1285,7 @@ watch(() => postForm.title, (newTitle) => {
 
 // 监听视图模式变化
 watch(viewMode, (newMode) => {
-  if (configForm.url && configForm.cookie) {
+  if (isConfigValid.value) {
     if (newMode === 'halo') {
       fetchPublishedPosts();
     } else if (newMode === 'siyuan') {
@@ -1236,8 +1295,8 @@ watch(viewMode, (newMode) => {
 });
 
 // 监听配置变化，加载分类和标签
-watch(() => [configForm.url, configForm.cookie], async ([newUrl, newCookie]) => {
-  if (newUrl && newCookie) {
+watch(() => [configForm.url, configForm.cookie, configForm.authType, configForm.personalAccessToken], async () => {
+  if (isConfigValid.value) {
     await loadTaxonomies();
   }
 }, { deep: true });
@@ -1482,10 +1541,7 @@ const recheckAuth = async () => {
   isCheckingAuth.value = true;
   
   try {
-    const config = useHalowebWeb({
-      url: configForm.url,
-      cookie: configForm.cookie
-    });
+    const config = getCurrentConfig();
     const adaptor = new HalowebWebAdaptor(config);
     const isValid = await adaptor.checkCookieValidity();
     
@@ -1524,6 +1580,15 @@ const openHaloConsole = () => {
 
 // 保存并验证 Cookie
 const saveAndVerifyCookie = async () => {
+  // 先保存
+  saveConfig();
+  
+  // 然后验证
+  await recheckAuth();
+};
+
+// 保存并验证个人令牌
+const saveAndVerifyPat = async () => {
   // 先保存
   saveConfig();
   
@@ -1573,10 +1638,7 @@ const loadTaxonomies = async () => {
   }
   
   try {
-    const config = useHalowebWeb({
-      url: configForm.url,
-      cookie: configForm.cookie
-    });
+    const config = getCurrentConfig();
     const adaptor = new HalowebWebAdaptor(config);
     
     // 并行加载分类和标签
@@ -1603,10 +1665,7 @@ const loadStoragePolicies = async () => {
   
   isLoadingPolicies.value = true;
   try {
-    const config = useHalowebWeb({
-      url: configForm.url,
-      cookie: configForm.cookie
-    });
+    const config = getCurrentConfig();
     const adaptor = new HalowebWebAdaptor(config);
     
     const policies = await adaptor.getStoragePolicies();
@@ -1677,10 +1736,7 @@ const addNewCategory = async () => {
   }
   
   try {
-    const config = useHalowebWeb({
-      url: configForm.url,
-      cookie: configForm.cookie
-    });
+    const config = getCurrentConfig();
     const adaptor = new HalowebWebAdaptor(config);
     
     const newCategory = await adaptor.createCategory(newCategoryName.value.trim());
@@ -1701,10 +1757,7 @@ const addNewTag = async () => {
   }
   
   try {
-    const config = useHalowebWeb({
-      url: configForm.url,
-      cookie: configForm.cookie
-    });
+    const config = getCurrentConfig();
     const adaptor = new HalowebWebAdaptor(config);
     
     const newTag = await adaptor.createTag(newTagName.value.trim());
@@ -1745,10 +1798,7 @@ const publishPost = async () => {
     const effectiveStoragePolicy = publishStoragePolicy.value || selectedStoragePolicy.value;
     console.log('[HaloPublisher] Using storage policy for publish:', effectiveStoragePolicy || 'default-policy');
     
-    const config = useHalowebWeb({
-      url: configForm.url,
-      cookie: configForm.cookie
-    });
+    const config = getCurrentConfig();
     // 添加存储策略到配置
     if (effectiveStoragePolicy) {
       config.storagePolicyName = effectiveStoragePolicy;
@@ -1888,10 +1938,7 @@ const fetchPublishedPosts = async () => {
   
   isRefreshing.value = true;
   try {
-    const config = useHalowebWeb({
-      url: configForm.url,
-      cookie: configForm.cookie
-    });
+    const config = getCurrentConfig();
     const adaptor = new HalowebWebAdaptor(config);
     
     const posts = await adaptor.getPublishedPosts();
@@ -1968,10 +2015,7 @@ const saveEditForm = async () => {
   
   isSaving.value = true;
   try {
-    const config = useHalowebWeb({
-      url: configForm.url,
-      cookie: configForm.cookie
-    });
+    const config = getCurrentConfig();
     const adaptor = new HalowebWebAdaptor(config);
     
     await adaptor.updatePostMetadata(editingPostId.value, {
@@ -2058,10 +2102,7 @@ const updateToHalo = async (noteItem: SiyuanNoteItem) => {
     const effectiveStoragePolicy = selectedStoragePolicy.value;
     console.log('[HaloPublisher] Using storage policy for update:', effectiveStoragePolicy || 'default-policy');
     
-    const config = useHalowebWeb({
-      url: configForm.url,
-      cookie: configForm.cookie
-    });
+    const config = getCurrentConfig();
     // 添加存储策略到配置
     if (effectiveStoragePolicy) {
       config.storagePolicyName = effectiveStoragePolicy;
@@ -2097,10 +2138,7 @@ const deletePost = async (postId: string) => {
   
   isDeleting.value = postId;
   try {
-    const config = useHalowebWeb({
-      url: configForm.url,
-      cookie: configForm.cookie
-    });
+    const config = getCurrentConfig();
     const adaptor = new HalowebWebAdaptor(config);
     
     await adaptor.deletePost(postId);
@@ -3835,6 +3873,91 @@ defineExpose({
   font-size: 13px;
   color: var(--hp-text-regular);
   margin-bottom: 6px;
+}
+
+/* 认证方式选择器 */
+.auth-type-selector {
+  margin-bottom: 20px;
+}
+
+.auth-type-selector .form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--hp-text-primary);
+}
+
+.auth-type-options {
+  display: flex;
+  gap: 16px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--hp-border);
+  transition: all 0.2s;
+  background: var(--hp-bg-surface);
+}
+
+.radio-label:hover {
+  background: var(--hp-bg-surface-light);
+  border-color: var(--hp-primary);
+}
+
+.radio-label.active {
+  background: var(--hp-primary-light);
+  border-color: var(--hp-primary);
+}
+
+.radio-label input[type="radio"] {
+  accent-color: var(--hp-primary);
+}
+
+.radio-label.active span {
+  color: var(--hp-primary);
+  font-weight: 500;
+}
+
+/* 个人令牌配置区域 */
+.pat-config-section {
+  margin-top: 20px;
+}
+
+.pat-config-section input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--hp-border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: monospace;
+  background: var(--hp-bg-surface);
+  color: var(--hp-text-primary);
+}
+
+.pat-config-section input[type="password"]:focus {
+  border-color: var(--hp-primary);
+  outline: none;
+}
+
+.pat-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--hp-primary-light);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--hp-text-regular);
+}
+
+.hint-icon {
+  flex-shrink: 0;
 }
 
 /* Cookie 配置区域 */

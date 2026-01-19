@@ -6,6 +6,9 @@ export interface PluginConfig {
   picbedType: string;
   cookie: string;
   storagePolicyName?: string; // 存储策略名称，如 'attachment-policy-xxx'
+  // 认证相关
+  authType?: 'cookie' | 'pat';  // 认证类型，默认 'cookie'
+  personalAccessToken?: string; // 个人令牌
 }
 
 // 思源笔记文档类型

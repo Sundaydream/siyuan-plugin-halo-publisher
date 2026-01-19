@@ -1079,6 +1079,8 @@ export class HalowebWebAdaptor extends BaseExtendApi {
         method: 'POST',
         contentType: `multipart/form-data; boundary=${boundary}`,
         cookie: this.cfg.cookie,
+        authType: this.cfg.authType,
+        personalAccessToken: this.cfg.personalAccessToken,
         bodyBase64: bodyBase64,
       });
 
@@ -1124,19 +1126,28 @@ export class HalowebWebAdaptor extends BaseExtendApi {
         // 5. 如果仍无 URL，尝试获取附件详情（支持 GitHub OSS 等异步生成 permalink 的存储插件）
         if (!url && result.metadata?.name) {
           console.log('[HaloPublisher] URL not found in upload response, fetching attachment details...');
-          // 等待一小段时间让 Halo 生成 permalink
-          await new Promise(resolve => setTimeout(resolve, 1000));
 
-          try {
-            const attachmentDetail = await this.getAttachmentDetail(result.metadata.name);
-            console.log('[HaloPublisher] Attachment detail:', attachmentDetail);
+          // 重试 4 次，每次等待时间递增 (2s, 4s, 6s, 8s)
+          const maxRetries = 4;
+          for (let i = 0; i < maxRetries; i++) {
+            // 等待时间：第一次 2s，第二次 4s，第三次 6s，第四次 8s
+            const delay = (i + 1) * 2000;
+            console.log(`[HaloPublisher] Attempt ${i + 1}/${maxRetries} to fetch attachment detail after ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
 
-            if (attachmentDetail?.status?.permalink) {
-              url = attachmentDetail.status.permalink;
-              console.log('[HaloPublisher] Using permalink from attachment detail:', url);
+            try {
+              const attachmentDetail = await this.getAttachmentDetail(result.metadata.name);
+              console.log(`[HaloPublisher] Attachment detail (Attempt ${i + 1}):`, attachmentDetail);
+
+              if (attachmentDetail?.status?.permalink) {
+                url = attachmentDetail.status.permalink;
+                console.log('[HaloPublisher] Using permalink from attachment detail:', url);
+                break; // 成功获取，退出循环
+              }
+            } catch (detailError) {
+              console.warn(`[HaloPublisher] Failed to fetch attachment detail (Attempt ${i + 1}):`, detailError);
+              // 如果是最后一次尝试仍然失败，且没有 URL，则循环结束自然会进入下方的失败处理
             }
-          } catch (detailError) {
-            console.warn('[HaloPublisher] Failed to fetch attachment detail:', detailError);
           }
         }
 

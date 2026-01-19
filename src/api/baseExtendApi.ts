@@ -11,6 +11,21 @@ export class BaseExtendApi {
   }
 
   /**
+   * 根据配置的认证类型返回对应的认证头
+   */
+  protected getAuthHeaders(): Record<string, string> {
+    if (this.cfg.authType === 'pat' && this.cfg.personalAccessToken) {
+      return {
+        'Authorization': `Bearer ${this.cfg.personalAccessToken}`
+      };
+    }
+    // 默认使用 Cookie
+    return {
+      'Cookie': this.cfg.cookie || ''
+    };
+  }
+
+  /**
    * 批量上传图片
    * @param images 图片 URL 列表
    * @returns 上传结果列表
@@ -70,7 +85,7 @@ export class BaseExtendApi {
           method: 'POST',
           body: formData,
           headers: {
-            'Cookie': this.cfg.cookie
+            ...this.getAuthHeaders()
           }
         }
       );
@@ -219,11 +234,11 @@ export class BaseExtendApi {
           const method = (options.method || 'GET').toUpperCase();
           try {
             if (method === 'GET' && typeof (plugin as any).fetchGet === 'function') {
-              // 对于 GET 请求，也通过 headers 传递 cookie
+              // 对于 GET 请求，传递认证头
               const response = await (plugin as any).fetchGet(url, {
                 headers: {
                   ...(options.headers as Record<string, string>),
-                  'Cookie': this.cfg.cookie
+                  ...this.getAuthHeaders()
                 }
               });
               return response;
@@ -234,7 +249,7 @@ export class BaseExtendApi {
                 ...options,
                 headers: {
                   ...(options.headers as Record<string, string>),
-                  'Cookie': this.cfg.cookie
+                  ...this.getAuthHeaders()
                 },
                 body: options.body
               });
@@ -253,7 +268,7 @@ export class BaseExtendApi {
         ...options,
         headers: {
           ...options.headers,
-          'Cookie': this.cfg.cookie
+          ...this.getAuthHeaders()
         },
         credentials: 'include'
       });
